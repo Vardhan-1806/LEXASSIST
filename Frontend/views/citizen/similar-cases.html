@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Case Research – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/tools.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div class="notif-bell" id="notifBell"><span>🔔</span><span class="notif-count" id="notifCount">0</span></div>
+      <div id="profileBadgeWrap"></div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <div id="notifDropdown" style="display:none;position:fixed;top:70px;right:16px;width:300px;background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:150;max-height:380px;overflow:hidden;border:1px solid var(--ivory-dark)">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--ivory-dark);display:flex;justify-content:space-between;align-items:center">
+      <strong>🔔 Notifications</strong>
+      <button onclick="NotifPanel.markAllRead()" style="font-size:0.7rem;padding:2px 8px;border:1px solid var(--ivory-dark);border-radius:50px;background:none;cursor:pointer">Mark all read</button>
+    </div>
+    <div id="notifDropdownList" style="overflow-y:auto;max-height:300px;padding:6px"></div>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user" style="cursor:pointer" onclick="window.location.href='/profile'">
+        <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+        <div class="sidebar-name" id="sidebarName">User</div>
+        <div class="sidebar-role" id="sidebarRole">Citizen</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Main</div>
+        <a href="/dashboard/citizen" class="sidebar-link"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"             class="sidebar-link"><span class="icon">📋</span>My Cases</a>
+        <a href="/lawyers"           class="sidebar-link"><span class="icon">⚖️</span>Find a Lawyer</a>
+        <a href="/appointments"      class="sidebar-link"><span class="icon">📅</span>Appointments</a>
+        <a href="/documents"         class="sidebar-link"><span class="icon">📂</span>Documents</a>
+        <div class="sidebar-section">Tools</div>
+        <a href="/documents/generate" class="sidebar-link"><span class="icon">📄</span>Doc Generator</a>
+        <a href="/similar-cases"      class="sidebar-link active"><span class="icon">🔍</span>Case Research</a>
+        <a href="/legal-aid"          class="sidebar-link"><span class="icon">🆓</span>Free Legal Aid</a>
+        <a href="/calendar"           class="sidebar-link"><span class="icon">🗓️</span>Calendar</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>🔍 Case Research</h1>
+        <p>Search similar court judgments and understand how cases like yours are typically resolved</p>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="card mb-20">
+        <div class="form-group mb-0">
+          <label class="form-label">Search by keywords, case type, or legal section</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" id="searchQ" class="form-control" placeholder="e.g. property dispute, Section 420, divorce maintenance..." style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')doSearch()">
+            <select id="searchType" class="form-control" style="width:160px">
+              <option value="">All Types</option>
+              <option>Criminal</option><option>Civil</option><option>Family</option>
+              <option>Property</option><option>Labour</option><option>Consumer</option><option>Constitutional</option>
+            </select>
+            <button onclick="doSearch()" class="btn btn-primary">🔍 Search Cases</button>
+          </div>
+        </div>
+
+        <!-- Quick topic chips -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <span style="font-size:0.76rem;color:var(--muted);align-self:center">Quick search:</span>
+          <button onclick="quickSearch('divorce')" class="filter-chip">Divorce</button>
+          <button onclick="quickSearch('property dispute')" class="filter-chip">Property Dispute</button>
+          <button onclick="quickSearch('bail section 437')" class="filter-chip">Bail</button>
+          <button onclick="quickSearch('Section 420 cheating')" class="filter-chip">Section 420</button>
+          <button onclick="quickSearch('consumer complaint refund')" class="filter-chip">Consumer Complaint</button>
+          <button onclick="quickSearch('labour wrongful termination')" class="filter-chip">Labour Rights</button>
+          <button onclick="quickSearch('cyber crime')" class="filter-chip">Cyber Crime</button>
+        </div>
+      </div>
+
+      <div id="resultsSection" style="display:none">
+        <div class="flex-between mb-16">
+          <h3 id="resultsTitle">Search Results</h3>
+          <span id="resultsCount" class="text-muted" style="font-size:0.84rem"></span>
+        </div>
+        <div id="resultsList"></div>
+      </div>
+
+      <!-- Case Type Overviews (shown by default) -->
+      <div id="overviewSection">
+        <h3 class="mb-16">📚 Legal Case Type Overviews</h3>
+        <p style="color:var(--muted);font-size:0.875rem;margin-bottom:20px">Click any case type to get a complete overview — what the law says, typical outcomes, documents needed, and timeline.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          ${['Criminal','Civil','Family','Property','Consumer','Labour','Cyber','Constitutional'].map ? '' : ''}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px" id="caseTypeCards"></div>
+      </div>
+
+      <!-- Case Detail Panel -->
+      <div id="caseDetailPanel" style="display:none" class="card mt-20">
+        <div class="flex-between mb-16">
+          <h3 id="detailTitle"></h3>
+          <button onclick="document.getElementById('caseDetailPanel').style.display='none';document.getElementById('overviewSection').style.display='block'" class="btn btn-outline btn-sm">← Back</button>
+        </div>
+        <div id="detailContent"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/global-enhancements.js"></script>
+  <script>
+    Auth.guard();
+
+    const CASE_OVERVIEWS = {
+      Criminal: { icon:'⚖️', color:'#dc2626', summary:'Criminal cases involve offences under the Indian Penal Code (IPC). Police file a chargesheet and the state prosecutes the accused.', sections:['IPC 302 — Murder','IPC 376 — Rape','IPC 420 — Cheating','IPC 498A — Domestic Cruelty','IPC 307 — Attempt to Murder'], documents:['FIR copy','ID proof','Medical reports (if injury)','Witness statements','Lawyer engagement letter'], duration:'6 months to 5+ years', outcome:'Conviction rate ~45% in India. Bail possible depending on section.' },
+      Civil: { icon:'📜', color:'#7c3aed', summary:'Civil cases involve disputes between individuals or organizations — contracts, damages, property, compensation.', sections:['CPC — Civil Procedure Code','Specific Relief Act','Limitation Act','Indian Contract Act'], documents:['Agreement/contract copy','Evidence of breach','Bank statements','Correspondence proof','Identity documents'], duration:'2-10 years (civil courts are slow)', outcome:'Settlements common. Courts award damages, injunctions, or specific performance.' },
+      Family: { icon:'👨‍👩‍👧', color:'#0284c7', summary:'Family law covers marriage, divorce, custody, maintenance, and adoption under personal laws (Hindu Marriage Act, Muslim Personal Law, etc.).', sections:['Hindu Marriage Act 1955','Section 125 CrPC — Maintenance','Domestic Violence Act 2005','POCSO Act 2012','Guardianship Act'], documents:['Marriage certificate','Birth certificates','Bank statements','Income proof','Property documents'], duration:'Mutual divorce: 6-18 months. Contested: 2-5 years', outcome:'Courts prioritize child welfare. Women generally get maintenance. 50-50 property split in mutual consent.' },
+      Property: { icon:'🏠', color:'#16a34a', summary:'Property disputes involve land ownership, boundaries, inheritance, sale deeds, encroachments, and builder fraud.', sections:['Transfer of Property Act','Registration Act 1908','Hindu Succession Act','RERA Act 2016','Easements Act'], documents:['Sale deed / Title deed','Encumbrance certificate','Survey sketch','Khata/Patta','Property tax receipts'], duration:'Civil suits: 3-10 years. RERA: 60 days', outcome:'RERA provides faster resolution for builder disputes. Traditional courts are slow — Lok Adalat recommended.' },
+      Consumer: { icon:'🛒', color:'#d97706', summary:'Consumer Protection Act 2019 protects buyers from defective goods, deficient services, unfair trade practices.', sections:['Consumer Protection Act 2019','RERA for housing','Motor Vehicle Act (accidents)','Insurance Act'], documents:['Bill/Invoice/Receipt','Warranty card','Defect photos','All correspondence','Payment proof'], duration:'District Commission: 3-6 months. Online: edaakhil.nic.in', outcome:'Up to ₹1 crore at district level. Very high consumer win rate for legitimate claims.' },
+      Labour: { icon:'👷', color:'#0891b2', summary:'Labour law protects workers\' rights — wages, termination, provident fund, gratuity, workplace safety, and sexual harassment.', sections:['Minimum Wages Act','Payment of Wages Act','Industrial Disputes Act','EPF Act 1952','POSH Act 2013'], documents:['Appointment letter','Salary slips (6 months)','Termination letter','Bank statements','Any written warnings'], duration:'Labour Commissioner: weeks. Labour Court: 1-3 years', outcome:'Workers usually win wrongful termination with proper evidence. Gratuity claims nearly always succeed.' },
+      Cyber: { icon:'💻', color:'#7c3aed', summary:'Cyber crimes include online fraud, hacking, cyberstalking, morphed images, financial fraud, and data theft under IT Act 2000.', sections:['IT Act Section 66 — Computer offences','IT Act Section 67 — Obscene content','IPC 420 — Online fraud','IPC 499/500 — Online defamation'], documents:['Screenshots with timestamps','Bank transaction details','Chat/email records','Device information','Cybercrime complaint receipt'], duration:'Cybercrime portal complaint: 24-48 hrs. Court case: 1-3 years', outcome:'Report immediately at cybercrime.gov.in or call 1930. Quick action recovers money in fraud cases.' },
+      Constitutional: { icon:'📖', color:'#0d1b35', summary:'Constitutional law involves fundamental rights, PIL (Public Interest Litigation), and challenging government actions.', sections:['Article 14 — Right to Equality','Article 19 — Freedom of Speech','Article 21 — Right to Life & Liberty','Article 32 — Constitutional Remedies','Article 226 — High Court Writ Jurisdiction'], documents:['Evidence of rights violation','Government order being challenged','Affected person details','Legal research on similar cases'], duration:'PIL: 3 months to 5 years. Writ petitions: 1-3 years', outcome:'High success rate for genuine rights violations. Cost-effective tool against government overreach.' }
+    };
+
+    // Render case type cards
+    document.getElementById('caseTypeCards').innerHTML = Object.entries(CASE_OVERVIEWS).map(([type, d]) => `
+      <div onclick="showDetail('${type}')" style="background:var(--white);border:1.5px solid var(--ivory-dark);border-radius:var(--radius-lg);padding:18px;cursor:pointer;transition:var(--transition)" onmouseover="this.style.borderColor='${d.color}'" onmouseout="this.style.borderColor='var(--ivory-dark)'">
+        <div style="font-size:1.8rem;margin-bottom:8px">${d.icon}</div>
+        <div style="font-weight:700;color:var(--navy);margin-bottom:4px">${type}</div>
+        <div style="font-size:0.76rem;color:var(--muted);line-height:1.4">${d.summary.slice(0,70)}...</div>
+        <div style="font-size:0.72rem;color:${d.color};font-weight:600;margin-top:8px">View overview →</div>
+      </div>`).join('');
+
+    const showDetail = (type) => {
+      const d = CASE_OVERVIEWS[type];
+      if (!d) return;
+      document.getElementById('overviewSection').style.display = 'none';
+      document.getElementById('resultsSection').style.display = 'none';
+      document.getElementById('caseDetailPanel').style.display = 'block';
+      document.getElementById('detailTitle').textContent = `${d.icon} ${type} Cases — Complete Overview`;
+      document.getElementById('detailContent').innerHTML = `
+        <p style="color:var(--muted);line-height:1.7;margin-bottom:20px">${d.summary}</p>
+        <div class="grid-2">
+          <div>
+            <h4 style="color:var(--navy);margin-bottom:10px">📌 Relevant Legal Sections</h4>
+            ${d.sections.map(s=>`<div style="padding:7px 12px;background:var(--ivory);border-radius:var(--radius);margin-bottom:7px;font-size:0.84rem;color:var(--navy)">${s}</div>`).join('')}
+          </div>
+          <div>
+            <h4 style="color:var(--navy);margin-bottom:10px">📎 Documents You Need</h4>
+            ${d.documents.map(doc=>`<div style="padding:7px 12px;background:var(--ivory);border-radius:var(--radius);margin-bottom:7px;font-size:0.84rem;display:flex;align-items:center;gap:8px"><span style="color:var(--success)">✓</span>${doc}</div>`).join('')}
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:16px">
+          <div style="background:var(--ivory);border-radius:var(--radius);padding:16px">
+            <div style="font-size:0.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">⏱️ Typical Duration</div>
+            <div style="font-weight:600;color:var(--navy)">${d.duration}</div>
+          </div>
+          <div style="background:var(--ivory);border-radius:var(--radius);padding:16px">
+            <div style="font-size:0.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">📊 Typical Outcome</div>
+            <div style="font-size:0.84rem;color:var(--navy);line-height:1.5">${d.outcome}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
+          <a href="/lawyers" class="btn btn-primary">⚖️ Find a ${type} Lawyer</a>
+          <button onclick="FloatChat?.toggle();FloatChat?.send('Tell me about ${type} cases in India')" class="btn btn-outline">🤖 Ask AI About This</button>
+        </div>`;
+    };
+
+    // Search functionality
+    const quickSearch = (q) => { document.getElementById('searchQ').value = q; doSearch(); };
+
+    const doSearch = async () => {
+      const q    = document.getElementById('searchQ').value.trim();
+      const type = document.getElementById('searchType').value;
+      if (!q && !type) { Toast.show('Enter a search term','warning'); return; }
+
+      document.getElementById('overviewSection').style.display = 'none';
+      document.getElementById('caseDetailPanel').style.display = 'none';
+      document.getElementById('resultsSection').style.display  = 'block';
+      document.getElementById('resultsTitle').textContent = `Results for "${q || type}"`;
+      document.getElementById('resultsList').innerHTML = '<div class="text-center" style="padding:30px"><span class="loader dark"></span> Searching...</div>';
+
+      try {
+        const d = await API.get(`/api/chatbot/search?q=${encodeURIComponent(q+' '+type)}`);
+
+        // Show AI answer as first card
+        const contextText = d.data?.context || '';
+        if (contextText.length > 50) {
+          const aiAnswer = await API.post('/api/chatbot/message', { message: q || `Tell me about ${type} cases`, sessionId:'research-'+Date.now() });
+          document.getElementById('resultsList').innerHTML = `
+            <div class="card mb-16" style="border-left:4px solid var(--gold)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <span style="font-size:1.3rem">🤖</span>
+                <strong style="color:var(--navy)">AI Legal Summary</strong>
+                <span style="font-size:0.72rem;color:var(--muted);margin-left:auto">Based on ${d.data?.sources?.length||0} legal sources</span>
+              </div>
+              <div style="color:var(--navy);line-height:1.7;font-size:0.875rem">${(aiAnswer.data?.answer||'').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
+              ${d.data?.sources?.length?`<div style="margin-top:12px;font-size:0.74rem;color:var(--muted)">Sources: ${d.data.sources.join(', ')}</div>`:''}
+              <div style="margin-top:14px"><a href="/lawyers" class="btn btn-sm btn-primary">⚖️ Find a Lawyer for this</a></div>
+            </div>`;
+        } else {
+          // Fallback to case type overview
+          const matchedType = Object.keys(CASE_OVERVIEWS).find(t => (q+type).toLowerCase().includes(t.toLowerCase()));
+          if (matchedType) {
+            showDetail(matchedType);
+          } else {
+            document.getElementById('resultsList').innerHTML = `<div class="card text-center" style="padding:30px"><div style="font-size:2rem;margin-bottom:10px">🤔</div><p>No specific results found for "${q}". Try a broader term or select a case type above.</p><button onclick="document.getElementById('overviewSection').style.display='block';document.getElementById('resultsSection').style.display='none'" class="btn btn-outline btn-sm">Browse All Case Types</button></div>`;
+          }
+        }
+        document.getElementById('resultsCount').textContent = '';
+      } catch(e) {
+        document.getElementById('resultsList').innerHTML = '<div class="alert alert-danger show">Search error. Please try again.</div>';
+      }
+    };
+
+    NotifPanel.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+/* ============================================================
+   LEXASSIST — Cases, Lawyers, Calendar, Appointments  |  cases.css
+   ============================================================ */
+
+/* ── Filter Bar ─────────────────────────────────────────────── */
+.filter-bar         { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+.filter-chip        { padding: 6px 14px; border-radius: 50px; border: 1.5px solid var(--ivory-dark); background: var(--white); cursor: pointer; font-size: 0.82rem; font-weight: 600; color: var(--muted); transition: var(--transition); white-space: nowrap; }
+.filter-chip.active,
+.filter-chip:hover  { border-color: var(--navy); background: var(--navy); color: var(--white); }
+.filter-search      { margin-left: auto; }
+.filter-search input{ width: 200px; }
+
+/* ── Case Card ──────────────────────────────────────────────── */
+.case-card          { background: var(--white); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--ivory-dark); transition: var(--transition); margin-bottom: 14px; cursor: pointer; }
+.case-card:hover    { border-color: var(--gold); box-shadow: var(--shadow); }
+.case-card-top      { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.case-number        { font-size: 0.72rem; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; }
+.case-title         { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: var(--navy); margin: 3px 0; }
+.case-meta          { display: flex; gap: 14px; font-size: 0.78rem; color: var(--muted); flex-wrap: wrap; }
+.case-meta span     { display: flex; align-items: center; gap: 4px; }
+.case-badges        { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+
+/* Progress Bar */
+.progress-wrap      { margin: 12px 0; }
+.progress-labels    { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; }
+.progress-bar       { height: 5px; background: var(--ivory-dark); border-radius: 3px; overflow: hidden; }
+.progress-fill      { height: 100%; background: linear-gradient(90deg, var(--navy), var(--gold)); border-radius: 3px; transition: width 0.7s ease; }
+.stages-dots        { display: flex; gap: 4px; margin-top: 9px; }
+.stage-dot          { width: 7px; height: 7px; border-radius: 50%; background: var(--ivory-dark); transition: var(--transition); }
+.stage-dot.done     { background: var(--gold); }
+.stage-dot.current  { background: var(--navy); box-shadow: 0 0 0 3px rgba(13,27,53,0.12); }
+
+/* Required Actions */
+.required-actions   { background: var(--ivory); border-radius: var(--radius); padding: 10px 14px; margin-top: 10px; }
+.required-actions h5{ font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 7px; }
+.required-actions li{ font-size: 0.82rem; color: var(--navy); display: flex; align-items: flex-start; gap: 7px; padding: 2px 0; }
+.required-actions li::before { content: '→'; color: var(--gold); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+/* Priority Reason */
+.priority-reason    { font-size: 0.76rem; font-weight: 500; margin-top: 7px; }
+
+/* Case Actions */
+.case-actions       { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; }
+
+/* ── Detail Panel ───────────────────────────────────────────── */
+.detail-panel {
+  position: fixed;
+  right: 0;
+  top: var(--navbar-h);
+  bottom: 0;
+  width: 400px;
+  background: var(--white);
+  border-left: 1px solid var(--ivory-dark);
+  padding: 24px;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: var(--transition);
+  z-index: 50;
+  box-shadow: var(--shadow-lg);
+  -webkit-overflow-scrolling: touch;
+}
+.detail-panel.open  { transform: translateX(0); }
+.detail-close       { width: 30px; height: 30px; border-radius: 50%; background: var(--ivory); border: none; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
+
+/* ── Lawyer Cards ───────────────────────────────────────────── */
+.search-hero        { background: linear-gradient(135deg, var(--navy), var(--navy-light)); padding: 38px 5%; color: var(--white); }
+.search-hero h2     { color: var(--white); margin-bottom: 7px; }
+.search-bar-wrap    { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.search-bar-wrap input,
+.search-bar-wrap select { padding: 10px 16px; border-radius: var(--radius); border: none; font-family: 'DM Sans',sans-serif; font-size: 0.875rem; background: rgba(255,255,255,0.1); color: var(--white); flex: 1; min-width: 140px; }
+.search-bar-wrap input::placeholder { color: rgba(255,255,255,0.45); }
+.search-bar-wrap select option { background: var(--navy); color: var(--white); }
+
+.lawyers-grid       { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.lawyer-card        { background: var(--white); border-radius: var(--radius-lg); padding: 22px; border: 1px solid var(--ivory-dark); transition: var(--transition); display: flex; flex-direction: column; gap: 10px; }
+.lawyer-card:hover  { border-color: var(--gold); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.lawyer-header      { display: flex; gap: 12px; align-items: flex-start; }
+.lawyer-avatar      { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, var(--navy), var(--navy-light)); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display',serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+.lawyer-name        { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--navy); }
+.verified-badge     { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; background: #f0fdf4; color: var(--success); border-radius: 50px; font-size: 0.7rem; font-weight: 600; margin-top: 3px; }
+.stars              { display: flex; align-items: center; gap: 4px; margin: 4px 0; }
+.stars-text         { color: #fbbf24; font-size: 0.85rem; }
+.stars-count        { font-size: 0.76rem; color: var(--muted); }
+.spec-tags          { display: flex; gap: 5px; flex-wrap: wrap; }
+.spec-tag           { padding: 3px 9px; background: rgba(13,27,53,0.06); border-radius: 50px; font-size: 0.72rem; font-weight: 500; color: var(--navy); }
+.lawyer-info-row    { display: flex; gap: 13px; font-size: 0.78rem; color: var(--muted); flex-wrap: wrap; }
+.lawyer-bio         { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+.lawyer-actions     { display: flex; gap: 7px; margin-top: 2px; flex-wrap: wrap; }
+
+/* Slot Grid */
+.slots-grid         { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; margin: 10px 0; }
+.slot-btn           { padding: 9px; border: 1.5px solid var(--ivory-dark); border-radius: var(--radius); text-align: center; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: var(--transition); color: var(--navy); background: var(--white); }
+.slot-btn:hover,
+.slot-btn.selected  { border-color: var(--navy); background: var(--navy); color: var(--white); }
+.slot-btn.unavailable { background: var(--ivory); color: var(--muted); cursor: default; opacity: 0.5; }
+
+/* ── Calendar ───────────────────────────────────────────────── */
+.calendar-nav       { display: flex; align-items: center; gap: 10px; }
+.cal-nav-btn        { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--ivory-dark); background: var(--white); cursor: pointer; font-size: 1rem; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+.cal-nav-btn:hover  { border-color: var(--navy); background: var(--navy); color: var(--white); }
+.cal-month          { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+.day-names          { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: 3px; }
+.day-name           { text-align: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); padding: 7px 0; }
+.cal-grid           { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-cell           { min-height: 70px; padding: 7px; border-radius: 7px; background: var(--white); border: 1px solid var(--ivory-dark); cursor: pointer; transition: var(--transition); position: relative; overflow: hidden; }
+.cal-cell:hover     { border-color: var(--gold); background: rgba(201,168,76,0.04); }
+.cal-cell.today     { border-color: var(--navy); background: rgba(13,27,53,0.04); }
+.cal-cell.other-month { opacity: 0.38; }
+.cal-date           { font-size: 0.82rem; font-weight: 600; color: var(--navy); }
+.cal-cell.today .cal-date { background: var(--navy); color: var(--white); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.76rem; }
+.cal-event          { font-size: 0.64rem; padding: 1px 5px; border-radius: 3px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+.event-Hearing      { background: rgba(220,38,38,0.1); color: var(--danger); }
+.event-Appointment  { background: rgba(79,70,229,0.1); color: #4f46e5; }
+.event-Deadline     { background: rgba(217,119,6,0.1); color: var(--warning); }
+.event-Reminder     { background: rgba(22,163,74,0.08); color: var(--success); }
+.event-Other        { background: rgba(100,116,139,0.08); color: var(--muted); }
+
+.upcoming-events-list .upcoming-item { padding: 9px 0; }
+
+/* ── Appointments Table ─────────────────────────────────────── */
+.appt-date          { font-weight: 600; color: var(--navy); font-size: 0.875rem; }
+.appt-time          { font-size: 0.74rem; color: var(--muted); }
+
+/* Responsive */
+@media(max-width:1024px) { .lawyers-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:768px){
+  .lawyers-grid       { grid-template-columns: 1fr; }
+  .detail-panel       { width: 100%; }
+  .filter-search      { margin-left: 0; width: 100%; }
+  .filter-search input{ width: 100%; }
+  .slots-grid         { grid-template-columns: repeat(3,1fr); }
+  .cal-cell           { min-height: 52px; padding: 5px; }
+  .search-bar-wrap input,
+  .search-bar-wrap select { min-width: 100%; }
+}
+@media(max-width:480px) {
+  .slots-grid         { grid-template-columns: repeat(2,1fr); }
+  .cal-cell           { min-height: 44px; padding: 4px; }
+  .cal-event          { display: none; }
+  .case-meta          { gap: 8px; }
+}

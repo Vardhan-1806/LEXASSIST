@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documents – LEXASSIST Lawyer</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cases.css">
+  <style>
+    .doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .doc-card{background:var(--white);border-radius:var(--radius-lg);padding:20px;border:1px solid var(--ivory-dark);transition:var(--transition);display:flex;flex-direction:column;gap:10px}
+    .doc-card:hover{border-color:var(--gold);box-shadow:var(--shadow)}
+    .doc-icon-wrap{width:46px;height:46px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+    .doc-meta{font-size:0.76rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+    .doc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+    .upload-zone{border:2px dashed var(--ivory-dark);border-radius:var(--radius-lg);padding:28px;text-align:center;cursor:pointer;transition:var(--transition);background:var(--ivory)}
+    .upload-zone:hover{border-color:var(--gold);background:rgba(201,168,76,0.05)}
+    .share-link-box{display:flex;gap:8px;margin-top:10px}
+    .share-link-box input{flex:1;padding:8px 13px;border-radius:var(--radius);border:1.5px solid var(--ivory-dark);font-size:0.82rem}
+    @media(max-width:480px){.doc-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div class="notif-bell" id="notifBell"><span>🔔</span><span class="notif-count" id="notifCount">0</span></div>
+      <div id="profileBadgeWrap"></div>
+      <a href="/login" onclick="Auth.logout();return false;" class="btn btn-secondary btn-sm">Logout</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <!-- Notification Dropdown -->
+  <div id="notifDropdown" style="display:none;position:fixed;top:70px;right:16px;width:300px;max-width:calc(100vw - 32px);background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:150;max-height:380px;overflow:hidden;border:1px solid var(--ivory-dark)">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--ivory-dark);display:flex;justify-content:space-between;align-items:center">
+      <strong style="color:var(--navy);font-size:0.9rem">🔔 Notifications</strong>
+      <button onclick="NotifPanel.markAllRead()" style="font-size:0.72rem;padding:3px 9px;border:1px solid var(--ivory-dark);border-radius:50px;background:var(--white);cursor:pointer;color:var(--navy)">Mark all read</button>
+    </div>
+    <div id="notifDropdownList" style="overflow-y:auto;max-height:300px"></div>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">L</div>
+        <div class="sidebar-name" id="sidebarName">Lawyer</div>
+        <div class="sidebar-role" id="sidebarRole" style="color:#fbbf24">⚖️ Lawyer</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Cases</div>
+        <a href="/dashboard/lawyer"  class="sidebar-link"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"             class="sidebar-link"><span class="icon">📋</span>Client Cases</a>
+        <a href="/appointments"      class="sidebar-link"><span class="icon">📅</span>Appointments</a>
+        <a href="/calendar"          class="sidebar-link"><span class="icon">🗓️</span>Calendar</a>
+        <a href="/lawyer/documents"  class="sidebar-link"><span class="icon">📂</span>Documents</a>
+        <div class="sidebar-section">Tools</div>
+        <a href="/chatbot"           class="sidebar-link"><span class="icon">🤖</span>Legal AI</a>
+        <a href="/similar-cases"     class="sidebar-link"><span class="icon">🔍</span>Case Research</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <h1>📂 Documents</h1>
+            <p>Store, manage and securely share legal documents with clients</p>
+          </div>
+          <button onclick="openModal('uploadModal')" class="btn btn-primary">📤 Upload Document</button>
+        </div>
+      </div>
+
+      <div class="stat-grid mb-24">
+        <div class="stat-card"><div class="stat-icon navy">📂</div><div><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Documents</div></div></div>
+        <div class="stat-card"><div class="stat-icon gold">📄</div><div><div class="stat-value" id="statPdf">—</div><div class="stat-label">PDF Files</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">🔗</div><div><div class="stat-value" id="statShared">—</div><div class="stat-label">Active Share Links</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">📅</div><div><div class="stat-value" id="statRecent">—</div><div class="stat-label">This Month</div></div></div>
+      </div>
+
+      <!-- Filter -->
+      <div class="filter-bar mb-16">
+        <div class="filter-chip active" onclick="filterDocs('all',this)">All Files</div>
+        <div class="filter-chip" onclick="filterDocs('pdf',this)">📄 PDF</div>
+        <div class="filter-chip" onclick="filterDocs('doc',this)">📝 DOC</div>
+        <div class="filter-chip" onclick="filterDocs('image',this)">🖼️ Images</div>
+        <div class="filter-search"><input type="text" class="form-control" placeholder="🔍 Search..." id="docSearch" oninput="searchDocs()" style="border-radius:50px"></div>
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="upload-zone mb-20" id="uploadZone" onclick="document.getElementById('quickFile').click()" ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" ondragleave="this.style.borderColor=''" ondrop="event.preventDefault();this.style.borderColor='';quickUpload(event.dataTransfer.files)">
+        <input type="file" id="quickFile" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" style="display:none" onchange="quickUpload(this.files)">
+        <div style="font-size:2.2rem;margin-bottom:8px">📁</div>
+        <h3 style="color:var(--navy);margin-bottom:4px">Drag & Drop files here</h3>
+        <p style="font-size:0.84rem">or click to browse · PDF, DOC, TXT, JPG · Max 10MB</p>
+      </div>
+
+      <div id="docsGrid" class="doc-grid"></div>
+      <div id="emptyState" class="hidden text-center card" style="padding:44px">
+        <div style="font-size:3rem;margin-bottom:14px">📭</div>
+        <h3>No documents yet</h3>
+        <p style="margin:8px 0 18px">Upload court documents, case files, or client agreements to keep everything organized.</p>
+        <button onclick="openModal('uploadModal')" class="btn btn-primary">📤 Upload First Document</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal">
+      <div class="modal-header"><div class="modal-title">📤 Upload Document</div><button class="modal-close" onclick="closeModal('uploadModal')">✕</button></div>
+      <form id="uploadForm">
+        <div class="form-group"><label class="form-label">Select File *</label><input type="file" id="uploadFile" class="form-control" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" required></div>
+        <div class="form-group"><label class="form-label">Document Title</label><input type="text" id="uploadTitle" class="form-control" placeholder="e.g. Court Order — Property Case 2024"></div>
+        <div class="form-group"><label class="form-label">Description</label><textarea id="uploadDesc" class="form-control" rows="2" placeholder="Brief description..."></textarea></div>
+        <button type="submit" id="uploadBtn" class="btn btn-primary btn-full">Upload →</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Share Modal -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal">
+      <div class="modal-header"><div class="modal-title">🔗 Share Document</div><button class="modal-close" onclick="closeModal('shareModal')">✕</button></div>
+      <p id="shareDocName" style="font-weight:600;color:var(--navy);font-size:0.9rem;margin-bottom:14px"></p>
+      <div class="form-group"><label class="form-label">Link valid for</label>
+        <select id="shareDays" class="form-control">
+          <option value="1">1 day</option><option value="3">3 days</option>
+          <option value="7" selected>7 days</option><option value="30">30 days</option>
+        </select>
+      </div>
+      <button onclick="generateLink()" id="shareBtn" class="btn btn-primary btn-full mb-12">Generate Share Link</button>
+      <div id="linkResult" class="hidden" style="background:var(--ivory);border-radius:var(--radius);padding:14px">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--navy);margin-bottom:7px">📋 Share link (send to client):</div>
+        <div class="share-link-box">
+          <input type="text" id="linkInput" readonly>
+          <button onclick="copyLink()" class="btn btn-dark btn-sm">Copy</button>
+        </div>
+        <div id="linkExpiry" style="font-size:0.72rem;color:var(--muted);margin-top:6px"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard(['lawyer','admin']);
+    let allDocs=[], shareDocId=null;
+
+    const getIcon=(t,n)=>{ const s=(t||'').toLowerCase()+(n||'').toLowerCase(); return s.includes('pdf')||s.includes('.pdf')?{i:'📕',c:'file-type-pdf'}: s.match(/word|\.doc/)? {i:'📘',c:'file-type-doc'}: s.match(/image|jpg|jpeg|png/)?{i:'🖼️',c:'file-type-img'}:{i:'📄',c:'file-type-txt'}; };
+    const fmtSize=b=>!b?'':b<1024?b+'B':b<1024*1024?(b/1024).toFixed(1)+'KB':(b/1024/1024).toFixed(1)+'MB';
+
+    const renderDocs=docs=>{
+      const g=document.getElementById('docsGrid'), e=document.getElementById('emptyState');
+      if(!docs.length){g.innerHTML='';e.classList.remove('hidden');return;}
+      e.classList.add('hidden');
+      g.innerHTML=docs.map(d=>{
+        const {i,c}=getIcon(d.fileType,d.originalName);
+        const dt=new Date(d.createdAt);
+        const shared=d.shareToken&&d.shareExpiry&&new Date(d.shareExpiry)>new Date();
+        return `<div class="doc-card">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div class="doc-icon-wrap ${c}">${i}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:0.88rem;color:var(--navy);word-break:break-word">${d.title||d.originalName}</div>
+              ${d.description?`<div style="font-size:0.74rem;color:var(--muted);margin-top:2px">${d.description.slice(0,55)}${d.description.length>55?'...':''}</div>`:''}
+            </div>
+          </div>
+          <div class="doc-meta">
+            <span>📅 ${dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})} at ${dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>
+            ${d.fileSize?`<span>💾 ${fmtSize(d.fileSize)}</span>`:''}
+            ${shared?`<span style="color:var(--success)">🔗 Shared until ${new Date(d.shareExpiry).toLocaleDateString('en-IN')}</span>`:''}
+          </div>
+          <div class="doc-actions">
+            <a href="${d.fileUrl}" target="_blank" class="btn btn-outline btn-sm">👁️ View</a>
+            <a href="${d.fileUrl}" download class="btn btn-dark btn-sm">⬇️ Download</a>
+            <button onclick="openShare('${d._id}','${(d.title||d.originalName).replace(/'/g,'')}')" class="btn btn-sm" style="background:rgba(201,168,76,0.12);color:var(--navy);border:none;cursor:pointer;border-radius:50px;padding:7px 12px;font-size:0.79rem;font-weight:600">🔗 Share</button>
+            <button onclick="delDoc('${d._id}',this)" class="btn btn-sm" style="background:#fef2f2;color:var(--danger);border:none;cursor:pointer;border-radius:50px;padding:7px 12px;font-size:0.79rem;font-weight:600">🗑️</button>
+          </div>
+        </div>`;
+      }).join('');
+      document.getElementById('statTotal').textContent=docs.length;
+      document.getElementById('statPdf').textContent=docs.filter(d=>(d.fileType||'').includes('pdf')||(d.originalName||'').endsWith('.pdf')).length;
+      document.getElementById('statShared').textContent=docs.filter(d=>d.shareToken&&d.shareExpiry&&new Date(d.shareExpiry)>new Date()).length;
+      const m=new Date();m.setDate(1);m.setHours(0,0,0,0);
+      document.getElementById('statRecent').textContent=docs.filter(d=>new Date(d.createdAt)>=m).length;
+    };
+
+    const loadDocs=async()=>{
+      try{const d=await API.get('/api/documents');allDocs=d.data||[];renderDocs(allDocs);}
+      catch(e){document.getElementById('docsGrid').innerHTML='<div class="alert alert-danger show">Error loading documents</div>';}
+    };
+
+    const filterDocs=(t,el)=>{
+      document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');
+      if(t==='all'){renderDocs(allDocs);return;}
+      renderDocs(allDocs.filter(d=>{const s=(d.fileType||'').toLowerCase()+(d.originalName||'').toLowerCase();
+        if(t==='pdf')return s.includes('pdf');if(t==='doc')return s.match(/word|\.doc/);if(t==='image')return s.match(/image|jpg|jpeg|png/);return true;
+      }));
+    };
+
+    const searchDocs=()=>{const q=document.getElementById('docSearch').value.toLowerCase();renderDocs(allDocs.filter(d=>(d.title||'').toLowerCase().includes(q)||(d.originalName||'').toLowerCase().includes(q)));};
+
+    const uploadFile=async(file,title='',desc='')=>{
+      const form=new FormData();form.append('file',file);if(title)form.append('title',title);if(desc)form.append('description',desc);
+      return(await fetch('/api/documents',{method:'POST',headers:{'Authorization':`Bearer ${Auth.token()}`},body:form})).json();
+    };
+
+    document.getElementById('uploadForm').addEventListener('submit',async e=>{
+      e.preventDefault();const file=document.getElementById('uploadFile').files[0];
+      if(!file)return Toast.show('Select a file','warning');
+      const btn=document.getElementById('uploadBtn');btn.innerHTML='<span class="loader"></span> Uploading...';btn.disabled=true;
+      const d=await uploadFile(file,document.getElementById('uploadTitle').value,document.getElementById('uploadDesc').value);
+      if(d.success){closeModal('uploadModal');document.getElementById('uploadForm').reset();loadDocs();Toast.show('Uploaded!','success');}
+      else Toast.show(d.message,'danger');
+      btn.innerHTML='Upload →';btn.disabled=false;
+    });
+
+    const quickUpload=async files=>{for(const f of files){const d=await uploadFile(f,f.name);if(d.success)Toast.show(`${f.name} uploaded!`,'success');else Toast.show(d.message,'danger');}loadDocs();};
+
+    const delDoc=async(id,btn)=>{
+      if(!confirm('Delete this document?'))return;btn.textContent='...';btn.disabled=true;
+      const d=await API.delete(`/api/documents/${id}`);
+      if(d.success){Toast.show('Deleted','success');loadDocs();}else{Toast.show(d.message,'danger');btn.textContent='🗑️';btn.disabled=false;}
+    };
+
+    const openShare=(id,name)=>{shareDocId=id;document.getElementById('shareDocName').textContent=`📄 ${name}`;document.getElementById('linkResult').classList.add('hidden');openModal('shareModal');};
+
+    const generateLink=async()=>{
+      const btn=document.getElementById('shareBtn'),days=document.getElementById('shareDays').value;
+      btn.innerHTML='<span class="loader"></span>';btn.disabled=true;
+      const d=await API.post(`/api/documents/${shareDocId}/share`,{days});
+      if(d.success){
+        document.getElementById('linkInput').value=d.data.shareUrl;
+        document.getElementById('linkExpiry').textContent=`⏰ Expires: ${new Date(d.data.expiresAt).toLocaleDateString('en-IN')} (${d.data.expiresIn})`;
+        document.getElementById('linkResult').classList.remove('hidden');loadDocs();
+      }else Toast.show(d.message,'danger');
+      btn.innerHTML='Generate Share Link';btn.disabled=false;
+    };
+
+    const copyLink=()=>{const i=document.getElementById('linkInput');i.select();navigator.clipboard.writeText(i.value).then(()=>Toast.show('Copied!','success')).catch(()=>{document.execCommand('copy');Toast.show('Copied!','success');});};
+
+    loadDocs();
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

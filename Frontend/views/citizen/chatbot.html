@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Legal Chatbot – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/dashboard/citizen" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <span class="navbar-tag">🤖 AI Legal Chatbot</span>
+    <div class="navbar-actions" style="margin-left:auto">
+      <a href="/dashboard/citizen" class="btn btn-secondary btn-sm">← Dashboard</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="chat-page">
+    <aside class="chat-sidebar">
+      <button class="new-chat-btn" onclick="newChat()">➕ New Conversation</button>
+      <div class="chat-history-label">Recent Chats</div>
+      <div id="historyList"></div>
+    </aside>
+
+    <div class="chat-main">
+      <div class="chat-header-bar">
+        <div class="chat-ai-avatar">🤖</div>
+        <div>
+          <div class="chat-ai-name">LEXI – AI Legal Assistant</div>
+          <div class="chat-ai-status">● Online · 2000+ Indian court cases</div>
+        </div>
+        <div class="chat-header-actions">
+          <a href="/similar-cases"     class="btn btn-outline btn-sm">🔍 Similar Cases</a>
+          <a href="/documents/generate"class="btn btn-outline btn-sm">📄 Generate Doc</a>
+        </div>
+      </div>
+
+      <div class="chat-messages-area" id="chatMessages">
+        <div class="chat-welcome">
+          <div class="chat-welcome-icon">⚖️</div>
+          <h3>Welcome to LEXI</h3>
+          <p>Ask any legal question or upload a legal document for me to explain in simple language.</p>
+          <p class="chat-welcome-note">For professional advice, consult a verified lawyer.</p>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="doc-analyzing" id="docAnalyzing">
+          <span class="loader dark"></span> Analyzing your document...
+        </div>
+        <div class="doc-upload-bar">
+          <span>📎 Upload legal document:</span>
+          <label class="doc-upload-label">
+            <input type="file" id="docFile" accept=".pdf,.txt" onchange="uploadDoc(this)">
+            📄 PDF / TXT
+          </label>
+          <span class="doc-upload-hint">Max 5MB</span>
+        </div>
+        <div class="quick-qs" id="quickQs">
+          <div class="quick-q" onclick="ask('How do I file an FIR?')">File FIR?</div>
+          <div class="quick-q" onclick="ask('What is bail and how to apply?')">What is bail?</div>
+          <div class="quick-q" onclick="ask('How to file for divorce in India?')">Divorce</div>
+          <div class="quick-q" onclick="ask('How to file a consumer complaint?')">Consumer complaint</div>
+          <div class="quick-q" onclick="ask('What are my rights if I am arrested?')">Arrest rights</div>
+          <div class="quick-q" onclick="ask('What is RTI and how to file it?')">File RTI</div>
+        </div>
+        <div class="chat-input-wrap">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Ask any legal question..." onkeydown="if(event.key==='Enter')sendMessage()">
+          <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Speak your question">🎤</button>
+          <button class="send-btn" onclick="sendMessage()">→</button>
+        </div>
+        <div class="voice-status" id="voiceStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard();
+    const user = Auth.user();
+    let sessionId = null, isListening = false, recognition = null;
+    const msgs = document.getElementById('chatMessages');
+
+    // ── Voice ─────────────────────────────────────────────────
+    const initVoice = () => {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { document.getElementById('voiceBtn').style.opacity='0.4'; document.getElementById('voiceBtn').title='Use Chrome for voice input'; return; }
+      recognition = new SR();
+      recognition.lang = 'en-IN';
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.onstart  = () => { isListening=true; document.getElementById('voiceBtn').classList.add('active'); document.getElementById('voiceStatus').textContent='🔴 Listening... speak now'; };
+      recognition.onresult = e => { const t=Array.from(e.results).map(r=>r[0].transcript).join(''); document.getElementById('chatInput').value=t; if(e.results[e.results.length-1].isFinal) document.getElementById('voiceStatus').textContent='✅ Got it! Press → to send'; };
+      recognition.onerror  = e => { document.getElementById('voiceStatus').textContent=e.error==='no-speech'?'No speech detected.':'Error: '+e.error; stopVoice(); };
+      recognition.onend    = () => stopVoice();
+    };
+    const toggleVoice = () => { if(!recognition){alert('Use Chrome for voice input');return;} isListening?recognition.stop():recognition.start(); };
+    const stopVoice   = () => { isListening=false; document.getElementById('voiceBtn').classList.remove('active'); setTimeout(()=>document.getElementById('voiceStatus').textContent='',3000); };
+    initVoice();
+
+    // ── Messages ──────────────────────────────────────────────
+    const addMsg = (role, content, sources=[]) => {
+      const wrap = document.createElement('div');
+      wrap.className = `msg-wrap ${role}`;
+      const avatar = role==='ai' ? '🤖' : (user.name||'U')[0].toUpperCase();
+      wrap.innerHTML = `
+        <div class="msg-avatar ${role}">${avatar}</div>
+        <div>
+          <div class="msg-content ${role}">${content.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>
+          ${sources.length?`<div class="msg-sources">${sources.map(s=>`<span class="msg-src-tag">📄 ${s}</span>`).join('')}</div>`:''}
+        </div>`;
+      msgs.appendChild(wrap);
+      msgs.scrollTop = msgs.scrollHeight;
+    };
+
+    const showTyping = () => {
+      const t=document.createElement('div'); t.className='msg-wrap ai'; t.id='typing';
+      t.innerHTML='<div class="msg-avatar ai">🤖</div><div class="typing"><span></span><span></span><span></span></div>';
+      msgs.appendChild(t); msgs.scrollTop=msgs.scrollHeight;
+    };
+    const hideTyping = () => document.getElementById('typing')?.remove();
+
+    const clearWelcome = () => {
+      msgs.querySelector('.chat-welcome')?.remove();
+      document.getElementById('quickQs').style.display='none';
+    };
+
+    const sendMessage = async () => {
+      const input = document.getElementById('chatInput');
+      const msg   = input.value.trim();
+      if (!msg) return;
+      clearWelcome();
+      input.value = '';
+      addMsg('user', msg);
+      showTyping();
+      try {
+        const d = await (await fetch('/api/chatbot/message',{method:'POST',headers:Auth.headers(),body:JSON.stringify({message:msg,sessionId})})).json();
+        hideTyping();
+        if (d.success) { sessionId=d.data.sessionId; addMsg('ai',d.data.answer,d.data.sources); loadHistory(); }
+        else addMsg('ai','⚠️ Error. Please try again.');
+      } catch(e) { hideTyping(); addMsg('ai','⚠️ Connection error.'); }
+    };
+
+    const ask = q => { document.getElementById('chatInput').value=q; sendMessage(); };
+
+    // ── Doc Upload ────────────────────────────────────────────
+    const uploadDoc = async (input) => {
+      const file = input.files[0];
+      if (!file) return;
+      clearWelcome();
+      document.getElementById('docAnalyzing').classList.add('show');
+      addMsg('user', `📄 Uploaded: **${file.name}** — Please explain this in simple language.`);
+      showTyping();
+      try {
+        const form = new FormData();
+        form.append('document', file);
+        const d = await (await fetch('/api/chatbot/analyze-doc',{method:'POST',headers:{'Authorization':`Bearer ${Auth.token()}`},body:form})).json();
+        hideTyping();
+        document.getElementById('docAnalyzing').classList.remove('show');
+        addMsg('ai', d.success ? d.data.answer : '⚠️ Could not analyze: '+d.message, d.success?['Document Analysis']:[]);
+      } catch(e) { hideTyping(); document.getElementById('docAnalyzing').classList.remove('show'); addMsg('ai','⚠️ Upload failed.'); }
+      input.value='';
+    };
+
+    // ── History ───────────────────────────────────────────────
+    const newChat = () => {
+      sessionId=null;
+      msgs.innerHTML='<div class="chat-welcome"><div class="chat-welcome-icon">⚖️</div><h3>New Conversation</h3><p>What legal question can I help with?</p></div>';
+      document.getElementById('quickQs').style.display='flex';
+    };
+
+    const loadHistory = async () => {
+      try {
+        const d = await API.get('/api/chatbot/history');
+        const el = document.getElementById('historyList');
+        if (!d.data?.length) { el.innerHTML='<div style="color:rgba(255,255,255,0.28);font-size:0.78rem">No previous chats</div>'; return; }
+        el.innerHTML = d.data.slice(0,8).map(h=>`<div class="history-item" onclick="loadSession('${h.session}')">💬 ${(h.messages[0]?.content||'Legal query').slice(0,36)}...</div>`).join('');
+      } catch(e) {}
+    };
+
+    const loadSession = async (sid) => {
+      sessionId = sid;
+      try {
+        const d = await API.get('/api/chatbot/history');
+        const s = d.data?.find(h=>h.session===sid);
+        if (!s) return;
+        msgs.innerHTML='';
+        s.messages.forEach(m=>addMsg(m.role==='user'?'user':'ai',m.content,m.sources||[]));
+      } catch(e) {}
+    };
+
+    loadHistory();
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

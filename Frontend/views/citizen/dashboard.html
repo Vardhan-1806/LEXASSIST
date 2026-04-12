@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Dashboard – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div class="notif-bell" id="notifBell"><span>🔔</span><span class="notif-count" id="notifCount">0</span></div>
+      <div id="profileBadgeWrap"></div>
+    </div>
+  </nav>
+  <div id="notifDropdown" style="display:none;position:fixed;top:70px;right:16px;width:300px;background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:150;max-height:380px;overflow:hidden;border:1px solid var(--ivory-dark)">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--ivory-dark);display:flex;justify-content:space-between;align-items:center">
+      <strong>🔔 Notifications</strong>
+      <button onclick="NotifPanel.markAllRead()" style="font-size:0.7rem;padding:2px 8px;border:1px solid var(--ivory-dark);border-radius:50px;background:none;cursor:pointer">Mark all read</button>
+    </div>
+    <div id="notifDropdownList" style="overflow-y:auto;max-height:300px;padding:6px"></div>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user" style="cursor:pointer" onclick="window.location.href='/profile'" title="Click to edit profile">
+        <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+        <div class="sidebar-name" id="sidebarName">User</div>
+        <div class="sidebar-role" id="sidebarRole" style="color:#fbbf24">👨 Citizen</div>
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:2px">Click to edit profile</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Main</div>
+        <a href="/dashboard/citizen" class="sidebar-link active"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"             class="sidebar-link"><span class="icon">📋</span>My Cases</a>
+        <a href="/lawyers"           class="sidebar-link"><span class="icon">⚖️</span>Find a Lawyer</a>
+        <a href="/appointments"      class="sidebar-link"><span class="icon">📅</span>Appointments</a>
+        <a href="/documents"         class="sidebar-link"><span class="icon">📂</span>Documents</a>
+        <div class="sidebar-section">Tools</div>
+        <a href="/documents/generate" class="sidebar-link"><span class="icon">📄</span>Doc Generator</a>
+        <a href="/similar-cases"      class="sidebar-link"><span class="icon">🔍</span>Case Research</a>
+        <a href="/legal-aid"          class="sidebar-link"><span class="icon">🆓</span>Free Legal Aid</a>
+        <a href="/calendar"           class="sidebar-link"><span class="icon">🗓️</span>Calendar</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <div>
+          <h2 id="welcomeMsg">Good morning!</h2>
+          <p>Here's your legal matters overview for today.</p>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+            <a href="/lawyers" class="btn btn-primary btn-sm">⚖️ Find a Lawyer</a>
+            <a href="/cases"   onclick="setTimeout(()=>document.getElementById('newCaseBtn')?.click(),300)" class="btn btn-secondary btn-sm">📋 + New Case</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Strip -->
+      <div class="emergency-strip" id="emergencyStrip" onclick="toggleEmergency()" style="background:#dc2626;color:#fff;padding:12px 20px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.2rem">🆘</span><div><div style="font-weight:700;font-size:0.9rem">Emergency Legal Help</div><div style="font-size:0.76rem;opacity:0.85">Police · Helplines · FIR Draft — Tap for immediate help</div></div></div>
+        <span id="emergArrow">→</span>
+      </div>
+      <div id="emergencyPanel" style="display:none;background:#fef2f2;border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;border:1px solid #fca5a5">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">
+          <a href="tel:112" class="btn btn-danger btn-sm" style="text-align:center">📞 Police 112</a>
+          <a href="tel:15100" class="btn btn-danger btn-sm" style="text-align:center">⚖️ NALSA 15100</a>
+          <a href="tel:181" class="btn btn-danger btn-sm" style="text-align:center">👩 Women 181</a>
+          <a href="tel:1930" class="btn btn-danger btn-sm" style="text-align:center">💻 Cyber 1930</a>
+          <a href="/documents/generate" class="btn btn-dark btn-sm" style="text-align:center">📄 Draft FIR</a>
+          <a href="/legal-aid" class="btn btn-outline btn-sm" style="text-align:center">🆓 Free Aid</a>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid mb-16">
+        <div class="stat-card"><div class="stat-icon navy">📋</div><div><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Cases</div></div></div>
+        <div class="stat-card"><div class="stat-icon gold">⚡</div><div><div class="stat-value" id="statActive">—</div><div class="stat-label">Active Cases</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">🔴</div><div><div class="stat-value" id="statHigh">—</div><div class="stat-label">High Priority</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="statClosed">—</div><div class="stat-label">Closed</div></div></div>
+      </div>
+
+      <!-- Primary 4 modules -->
+      <div class="grid-4 mb-16" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px">
+        <a href="/cases"    class="quick-action"><div class="quick-action-icon">📋</div><div class="quick-action-label">My Cases</div></a>
+        <a href="/lawyers"  class="quick-action"><div class="quick-action-icon">⚖️</div><div class="quick-action-label">Find Lawyer</div></a>
+        <a href="/documents"class="quick-action"><div class="quick-action-icon">📂</div><div class="quick-action-label">Documents</div></a>
+        <a href="/appointments" class="quick-action"><div class="quick-action-icon">📅</div><div class="quick-action-label">Appointments</div></a>
+      </div>
+
+      <!-- More Tools (collapsible) -->
+      <div class="card mb-16">
+        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleTools()">
+          <h4 style="margin:0;color:var(--navy)">🔧 More Tools</h4>
+          <span id="toolsArrow" style="color:var(--muted);font-size:0.85rem">▼ expand</span>
+        </div>
+        <div id="toolsGrid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:14px">
+          <a href="/documents/generate" class="feature-link">
+            <div class="feature-link-icon">📄</div>
+            <div class="feature-link-title">Doc Generator</div>
+            <div class="feature-link-desc">FIR, Bail, RTI, Consumer PDFs</div>
+          </a>
+          <a href="/similar-cases" class="feature-link">
+            <div class="feature-link-icon">🔍</div>
+            <div class="feature-link-title">Case Research</div>
+            <div class="feature-link-desc">Search 2000+ court judgments</div>
+          </a>
+          <a href="/legal-aid" class="feature-link">
+            <div class="feature-link-icon">🆓</div>
+            <div class="feature-link-title">Free Legal Aid</div>
+            <div class="feature-link-desc">Check NALSA eligibility</div>
+          </a>
+          <a href="/calendar" class="feature-link">
+            <div class="feature-link-icon">🗓️</div>
+            <div class="feature-link-title">Calendar</div>
+            <div class="feature-link-desc">Hearings & appointments</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Recent Cases + Upcoming Events -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="flex-between mb-12">
+            <h4>📋 Recent Cases</h4>
+            <a href="/cases" class="btn btn-outline btn-sm">View All</a>
+          </div>
+          <div id="recentCases"><div class="text-center text-muted" style="padding:20px">Loading...</div></div>
+        </div>
+        <div class="card">
+          <div class="flex-between mb-12">
+            <h4>📅 Upcoming Events</h4>
+            <a href="/calendar" class="btn btn-outline btn-sm">Calendar</a>
+          </div>
+          <div id="upcomingEvents"><div class="text-center text-muted" style="padding:20px">Loading...</div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- New Case Modal -->
+  <div class="modal-overlay" id="newCaseModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-header"><div class="modal-title">📋 File New Case</div><button class="modal-close" onclick="closeModal('newCaseModal')">✕</button></div>
+      <form id="newCaseForm">
+        <div class="form-grid-2">
+          <div class="form-group"><label class="form-label">Case Title *</label><input type="text" id="cTitle" class="form-control" placeholder="Brief case title" required></div>
+          <div class="form-group"><label class="form-label">Case Type *</label>
+            <select id="cType" class="form-control" required onchange="SmartRec?.show(this.value,'new');DocChecklist?.show(this.value,'new')">
+              <option value="">Select type</option>
+              <option>Criminal</option><option>Civil</option><option>Family</option><option>Property</option><option>Labour</option><option>Consumer</option><option>Cyber</option><option>Constitutional</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Description</label><textarea id="cDesc" class="form-control" rows="3" placeholder="Describe your case briefly..."></textarea></div>
+        <div class="form-grid-2">
+          <div class="form-group"><label class="form-label">Court (optional)</label><input type="text" id="cCourt" class="form-control" placeholder="e.g. District Court, Hyderabad"></div>
+          <div class="form-group"><label class="form-label">Next Hearing Date</label><input type="date" id="cHearing" class="form-control"></div>
+        </div>
+        <div id="lawyerRec" style="display:none;background:var(--ivory);border-radius:var(--radius);padding:14px;margin-bottom:12px"></div>
+        <div id="docChecklist" style="display:none;background:var(--ivory);border-radius:var(--radius);padding:14px;margin-bottom:12px"></div>
+        <button type="submit" id="caseBtn" class="btn btn-primary btn-full">File Case →</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/global-enhancements.js"></script>
+  <script>
+    Auth.guard(['citizen','admin']);
+    const user = Auth.user();
+
+    // Welcome message
+    const h = new Date().getHours();
+    document.getElementById('welcomeMsg').textContent = `Good ${h<12?'morning':h<17?'afternoon':'evening'}, ${user.name?.split(' ')[0]||''}!`;
+
+    // Emergency toggle
+    const toggleEmergency = () => {
+      const panel = document.getElementById('emergencyPanel');
+      const arrow = document.getElementById('emergArrow');
+      const open  = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      arrow.textContent   = open ? '✕' : '→';
+    };
+
+    // Tools toggle
+    const toggleTools = () => {
+      const grid  = document.getElementById('toolsGrid');
+      const arrow = document.getElementById('toolsArrow');
+      const open  = grid.style.display === 'none';
+      grid.style.display  = open ? 'grid' : 'none';
+      arrow.textContent   = open ? '▲ collapse' : '▼ expand';
+    };
+
+    // Load stats
+    const loadStats = async () => {
+      try {
+        const d = await API.get('/api/cases/stats');
+        if (!d.success) return;
+        document.getElementById('statTotal').textContent  = d.data.total;
+        document.getElementById('statActive').textContent = d.data.active;
+        document.getElementById('statHigh').textContent   = d.data.highPriority + d.data.critical;
+        document.getElementById('statClosed').textContent = d.data.closed;
+      } catch(e) {}
+    };
+
+    // Load recent cases
+    const loadRecent = async () => {
+      try {
+        const d = await API.get('/api/cases?limit=4');
+        const el = document.getElementById('recentCases');
+        if (!d.data?.length) {
+          el.innerHTML = `<div class="text-center text-muted" style="padding:16px">No cases yet. <a href="#" onclick="openModal('newCaseModal');return false;" style="color:var(--gold);font-weight:600">File your first case →</a></div>`;
+          return;
+        }
+        el.innerHTML = d.data.map(c => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--ivory-dark)">
+            <div style="min-width:0;flex:1">
+              <div style="font-weight:600;font-size:0.875rem;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.title}</div>
+              <div style="font-size:0.74rem;color:var(--muted)">${c.caseNumber} · ${c.caseType}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;margin-left:10px;flex-shrink:0">
+              <span class="badge badge-${(c.priority||'medium').toLowerCase()}">${c.priority||'Medium'}</span>
+              <span style="font-size:0.72rem;color:var(--muted)">${c.status}</span>
+            </div>
+          </div>`).join('');
+      } catch(e) {}
+    };
+
+    // Load upcoming calendar events
+    const loadUpcoming = async () => {
+      try {
+        const d  = await API.get('/api/calendar?upcoming=true&limit=4');
+        const el = document.getElementById('upcomingEvents');
+        if (!d.data?.length) { el.innerHTML = '<div class="text-center text-muted" style="padding:16px">No upcoming events</div>'; return; }
+        el.innerHTML = d.data.map(ev => {
+          const dt = new Date(ev.startDate);
+          const isUrgent = dt < new Date(Date.now() + 3*86400000);
+          return `<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--ivory-dark)">
+            <div style="width:38px;height:38px;border-radius:8px;background:${isUrgent?'#fef2f2':'var(--ivory)'};display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+              <div style="font-size:0.7rem;font-weight:700;color:${isUrgent?'var(--danger)':'var(--navy)'}">${dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}).split(' ')[0]}</div>
+              <div style="font-size:0.62rem;color:var(--muted)">${dt.toLocaleDateString('en-IN',{month:'short'})}</div>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.84rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.title}</div>
+              <div style="font-size:0.72rem;color:var(--muted)">${ev.type} ${isUrgent?'<span style="color:var(--danger)">· Soon!</span>':''}</div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch(e) { document.getElementById('upcomingEvents').innerHTML = '<div class="text-muted" style="padding:10px">No upcoming events</div>'; }
+    };
+
+    // New case submit
+    document.getElementById('newCaseForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('caseBtn');
+      btn.innerHTML = '<span class="loader"></span> Filing...'; btn.disabled = true;
+      try {
+        const d = await API.post('/api/cases', {
+          title: document.getElementById('cTitle').value,
+          caseType: document.getElementById('cType').value,
+          description: document.getElementById('cDesc').value,
+          court: document.getElementById('cCourt').value,
+          nextHearingDate: document.getElementById('cHearing').value || undefined,
+        });
+        if (d.success) {
+          Toast.show(`Case ${d.data.caseNumber} filed!`, 'success');
+          closeModal('newCaseModal');
+          document.getElementById('newCaseForm').reset();
+          loadStats(); loadRecent();
+        } else Toast.show(d.message, 'danger');
+      } catch(err) { Toast.show('Error filing case', 'danger'); }
+      btn.innerHTML = 'File Case →'; btn.disabled = false;
+    });
+
+    // Expose for header button
+    window.newCaseBtn = { click: () => openModal('newCaseModal') };
+
+    loadStats();
+    loadRecent();
+    loadUpcoming();
+    NotifPanel.init();
+    setInterval(NotifPanel.poll, 20000);
+  </script>
+</body>
+</html>

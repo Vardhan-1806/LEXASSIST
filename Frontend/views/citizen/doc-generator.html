@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Generator – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/tools.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div id="profileBadgeWrap"></div>
+      <a href="/dashboard/citizen" class="btn btn-secondary btn-sm">← Dashboard</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+        <div class="sidebar-name" id="sidebarName">User</div>
+        <div class="sidebar-role" id="sidebarRole">Citizen</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Main</div>
+        <a href="/dashboard/citizen"  class="sidebar-link"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"              class="sidebar-link"><span class="icon">📋</span>My Cases</a>
+        <a href="/chatbot"            class="sidebar-link"><span class="icon">🤖</span>AI Chatbot</a>
+        <a href="/lawyers"            class="sidebar-link"><span class="icon">⚖️</span>Find Lawyers</a>
+        <a href="/appointments"       class="sidebar-link"><span class="icon">📅</span>Appointments</a>
+        <div class="sidebar-section">Tools</div>
+        <a href="/documents/generate" class="sidebar-link"><span class="icon">📄</span>Doc Generator</a>
+        <a href="/similar-cases"      class="sidebar-link"><span class="icon">🔍</span>Similar Cases</a>
+        <a href="/legal-aid"          class="sidebar-link"><span class="icon">🆓</span>Free Legal Aid</a>
+        <a href="/profile"             class="sidebar-link"><span class="icon">👤</span>My Profile</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div class="page-header">
+        <h1>📄 Legal Document Generator</h1>
+        <p>Generate ready-to-use legal documents. Fill the form and download as PDF instantly.</p>
+      </div>
+
+      <div class="info-notice">⚠️ These are <strong>draft templates</strong> to help you get started. Always have a qualified lawyer review before submitting.</div>
+
+      <div class="doc-tabs">
+        <div class="doc-tab active" onclick="switchDoc('fir',this)">📝 FIR Draft</div>
+        <div class="doc-tab" onclick="switchDoc('notice',this)">📨 Legal Notice</div>
+        <div class="doc-tab" onclick="switchDoc('bail',this)">⚖️ Bail Application</div>
+        <div class="doc-tab" onclick="switchDoc('consumer',this)">🛒 Consumer Complaint</div>
+        <div class="doc-tab" onclick="switchDoc('rti',this)">📋 RTI Application</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <!-- FIR -->
+          <div class="doc-form-section active" id="form-fir">
+            <div class="doc-form-icon">📝</div>
+            <div class="doc-form-title">FIR Draft</div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Your Name</label><input class="form-control" id="fir-name" placeholder="Full name" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Your Address</label><input class="form-control" id="fir-address" placeholder="Full address" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Police Station</label><input class="form-control" id="fir-station" placeholder="Station name" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Date of Incident</label><input type="date" class="form-control" id="fir-date" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Nature of Offence</label><input class="form-control" id="fir-offence" placeholder="e.g. Theft, Assault, Cheating" oninput="updatePreview()"></div>
+            <div class="form-group"><label class="form-label">Description of Incident</label><textarea class="form-control" id="fir-desc" rows="4" placeholder="Describe what happened..." oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label class="form-label">Accused Name/Description</label><input class="form-control" id="fir-accused" placeholder="Name or description" oninput="updatePreview()"></div>
+          </div>
+          <!-- Legal Notice -->
+          <div class="doc-form-section" id="form-notice">
+            <div class="doc-form-icon">📨</div>
+            <div class="doc-form-title">Legal Notice</div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Sender Name</label><input class="form-control" id="notice-sender" placeholder="Your full name" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Sender Address</label><input class="form-control" id="notice-saddr" placeholder="Your address" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Recipient Name</label><input class="form-control" id="notice-recv" placeholder="Name of person/company" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Recipient Address</label><input class="form-control" id="notice-raddr" placeholder="Their address" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Subject / Grievance</label><input class="form-control" id="notice-subject" placeholder="e.g. Non-payment of dues" oninput="updatePreview()"></div>
+            <div class="form-group"><label class="form-label">Relief Demanded</label><input class="form-control" id="notice-amount" placeholder="e.g. ₹50,000 or specific action" oninput="updatePreview()"></div>
+            <div class="form-group"><label class="form-label">Details</label><textarea class="form-control" id="notice-details" rows="3" placeholder="Describe the dispute..." oninput="updatePreview()"></textarea></div>
+          </div>
+          <!-- Bail -->
+          <div class="doc-form-section" id="form-bail">
+            <div class="doc-form-icon">⚖️</div>
+            <div class="doc-form-title">Bail Application</div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Applicant Name</label><input class="form-control" id="bail-name" placeholder="Name of accused" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Case / FIR Number</label><input class="form-control" id="bail-case" placeholder="FIR No." oninput="updatePreview()"></div>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Court Name</label><input class="form-control" id="bail-court" placeholder="Name of court" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Offence Charged</label><input class="form-control" id="bail-offence" placeholder="Section and offence" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Grounds for Bail</label><textarea class="form-control" id="bail-grounds" rows="4" placeholder="e.g. First offender, family dependents..." oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label class="form-label">Surety Details</label><input class="form-control" id="bail-surety" placeholder="Name and details of guarantor" oninput="updatePreview()"></div>
+          </div>
+          <!-- Consumer -->
+          <div class="doc-form-section" id="form-consumer">
+            <div class="doc-form-icon">🛒</div>
+            <div class="doc-form-title">Consumer Complaint</div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Your Name</label><input class="form-control" id="con-name" placeholder="Full name" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Your Address</label><input class="form-control" id="con-addr" placeholder="Your address" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Company / Seller</label><input class="form-control" id="con-company" placeholder="Company name" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Product / Service</label><input class="form-control" id="con-product" placeholder="e.g. Laptop, AC Repair" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Purchase Date</label><input type="date" class="form-control" id="con-date" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Amount Paid (₹)</label><input class="form-control" id="con-amount" placeholder="Amount" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Nature of Complaint</label><textarea class="form-control" id="con-complaint" rows="3" placeholder="Describe the defect..." oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label class="form-label">Relief Sought</label><input class="form-control" id="con-relief" placeholder="e.g. Full refund, replacement" oninput="updatePreview()"></div>
+          </div>
+          <!-- RTI -->
+          <div class="doc-form-section" id="form-rti">
+            <div class="doc-form-icon">📋</div>
+            <div class="doc-form-title">RTI Application</div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Applicant Name</label><input class="form-control" id="rti-name" placeholder="Your full name" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Applicant Address</label><input class="form-control" id="rti-addr" placeholder="Your address" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group"><label class="form-label">Public Authority / Dept</label><input class="form-control" id="rti-dept" placeholder="e.g. Municipal Corporation" oninput="updatePreview()"></div>
+              <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-control" id="rti-date" oninput="updatePreview()"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Information Requested</label><textarea class="form-control" id="rti-info" rows="4" placeholder="Clearly state what information you need..." oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label class="form-label">Period / Time Frame</label><input class="form-control" id="rti-period" placeholder="e.g. Jan 2023 – Dec 2023" oninput="updatePreview()"></div>
+          </div>
+
+          <div class="doc-form-actions">
+            <button class="btn btn-dark btn-lg" onclick="generatePDF()">📥 Download PDF</button>
+            <button onclick="clearForm()" class="btn btn-outline">Clear Form</button>
+          </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="card">
+          <div class="flex-between mb-16">
+            <h3>📋 Document Preview</h3>
+            <span class="text-muted" style="font-size:0.76rem">Updates as you type</span>
+          </div>
+          <div class="preview-box" id="previewBox">Fill the form to see your document preview here...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard();
+    let currentDoc = 'fir';
+    const today = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+    const v = id => (document.getElementById(id)?.value||'').trim();
+
+    const TEMPLATES = {
+      fir: () => `To,\nThe Station House Officer,\n${v('fir-station')||'[POLICE STATION]'},\n[District], [State]\n\nDate: ${today}\n\nSUBJECT: Request for Registration of FIR\n\nRespected Sir/Madam,\n\nI, ${v('fir-name')||'[YOUR NAME]'}, residing at ${v('fir-address')||'[YOUR ADDRESS]'}, request you to register an FIR against the below-mentioned accused.\n\nFACTS:\nOn ${v('fir-date')?new Date(v('fir-date')).toLocaleDateString('en-IN'):'[DATE]'}, the following occurred:\n\n${v('fir-desc')||'[DESCRIBE INCIDENT]'}\n\nACCUSED:\n${v('fir-accused')||'[ACCUSED NAME/DESCRIPTION]'}\n\nOFFENCE:\n${v('fir-offence')||'[NATURE OF OFFENCE]'}\n\nI declare that the above is true and correct.\n\nYours faithfully,\n\n${v('fir-name')||'[YOUR NAME]'}\n${v('fir-address')||'[YOUR ADDRESS]'}\nDate: ${today}\n\n[Signature]`,
+
+      notice: () => `LEGAL NOTICE\n\nFROM:\n${v('notice-sender')||'[SENDER NAME]'}\n${v('notice-saddr')||'[SENDER ADDRESS]'}\n\nTO:\n${v('notice-recv')||'[RECIPIENT NAME]'}\n${v('notice-raddr')||'[RECIPIENT ADDRESS]'}\n\nDate: ${today}\n\nSUBJECT: Legal Notice for ${v('notice-subject')||'[SUBJECT]'}\n\nSir/Madam,\n\nUnder instructions from my client ${v('notice-sender')||'[SENDER]'}, I serve you with this legal notice.\n\nFACTS:\n${v('notice-details')||'[DETAILS OF DISPUTE]'}\n\nDEMAND:\nMy client demands ${v('notice-amount')||'[RELIEF DEMANDED]'} within 15 days from receipt of this notice.\n\nFailure to comply will result in legal proceedings at your risk, cost and consequences.\n\n${v('notice-sender')||'[SENDER NAME]'}\nDate: ${today}\n\n[Signature]`,
+
+      bail: () => `IN THE ${(v('bail-court')||'[COURT NAME]').toUpperCase()}\n\nBAIL APPLICATION\n\nIN THE MATTER OF:\n${v('bail-name')||'[APPLICANT NAME]'}     ... APPLICANT/ACCUSED\n\nCase/FIR No.: ${v('bail-case')||'[CASE NUMBER]'}\nOffence(s): ${v('bail-offence')||'[OFFENCE]'}\n\nAPPLICATION FOR BAIL UNDER SECTION 437/439 CrPC\n\nMOST RESPECTFULLY SUBMITTED:\n\n1. The applicant ${v('bail-name')||'[NAME]'} has been arrested in FIR No. ${v('bail-case')||'[NO]'} for ${v('bail-offence')||'[OFFENCE]'}.\n\n2. The applicant is innocent and falsely implicated.\n\n3. GROUNDS FOR BAIL:\n${v('bail-grounds')||'[GROUNDS]'}\n\n4. The applicant undertakes to appear on every date, not tamper with evidence.\n\n5. SURETY: ${v('bail-surety')||'[SURETY DETAILS]'}\n\nPRAYER:\nGrant bail on such terms as this court deems fit.\n\nDate: ${today}\n\n[Signature of Applicant/Advocate]`,
+
+      consumer: () => `BEFORE THE DISTRICT CONSUMER DISPUTES REDRESSAL COMMISSION\n[District], [State]\n\nCOMPLAINT NO. ___ OF ${new Date().getFullYear()}\n\nCOMPLAINANT:\n${v('con-name')||'[YOUR NAME]'},\n${v('con-addr')||'[YOUR ADDRESS]'}\n\nVERSUS\n\nOPPOSITE PARTY:\n${v('con-company')||'[COMPANY NAME]'}\n[Company Address]\n\nFACTS:\n1. Complainant is a consumer under the Consumer Protection Act, 2019.\n2. On ${v('con-date')?new Date(v('con-date')).toLocaleDateString('en-IN'):'[DATE]'}, purchased ${v('con-product')||'[PRODUCT]'} for ₹${v('con-amount')||'[AMOUNT]'}.\n3. DEFICIENCY:\n${v('con-complaint')||'[COMPLAINT DETAILS]'}\n\nPRAYER:\na) ${v('con-relief')||'[RELIEF SOUGHT]'}\nb) Compensation for mental agony\nc) Cost of litigation\n\nDate: ${today}\n\n${v('con-name')||'[YOUR NAME]'}\n[Signature]`,
+
+      rti: () => `To,\nThe Public Information Officer,\n${v('rti-dept')||'[PUBLIC AUTHORITY]'},\n[Address]\n\nDate: ${v('rti-date')?new Date(v('rti-date')).toLocaleDateString('en-IN'):today}\n\nSUBJECT: Application under the Right to Information Act, 2005\n\nSir/Madam,\n\nI, ${v('rti-name')||'[YOUR NAME]'}, residing at ${v('rti-addr')||'[YOUR ADDRESS]'}, request the following information:\n\nINFORMATION REQUESTED:\n${v('rti-info')||'[INFORMATION NEEDED]'}\n\nPERIOD: ${v('rti-period')||'[TIME PERIOD]'}\n\nI am willing to pay the prescribed fee of ₹10/-.\n\nPlease provide the information within 30 days as mandated under Section 7(1) of the RTI Act, 2005.\n\nYours faithfully,\n\n${v('rti-name')||'[YOUR NAME]'}\n${v('rti-addr')||'[YOUR ADDRESS]'}\n\n[Signature]\n\nNote: RTI Fee ₹10 — Pay by postal order or bank draft`
+    };
+
+    const switchDoc = (doc, el) => {
+      currentDoc = doc;
+      document.querySelectorAll('.doc-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+      document.querySelectorAll('.doc-form-section').forEach(s=>s.classList.remove('active'));
+      document.getElementById(`form-${doc}`).classList.add('active');
+      updatePreview();
+    };
+
+    const updatePreview = () => { document.getElementById('previewBox').textContent = TEMPLATES[currentDoc](); };
+    const clearForm     = () => { document.querySelectorAll(`#form-${currentDoc} input, #form-${currentDoc} textarea`).forEach(el=>el.value=''); updatePreview(); };
+
+    const generatePDF = () => {
+      const { jsPDF } = window.jspdf;
+      const doc   = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      const text  = TEMPLATES[currentDoc]();
+      doc.setFillColor(13,27,53); doc.rect(0,0,210,16,'F');
+      doc.setTextColor(201,168,76); doc.setFontSize(12); doc.setFont('helvetica','bold');
+      doc.text('LEXASSIST — Legal Document Generator',105,10,{align:'center'});
+      doc.setTextColor(220,220,220); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.text('DRAFT — Review with a lawyer before submitting',105,16,{align:'center'});
+      doc.setTextColor(30,30,30); doc.setFontSize(10); doc.setFont('helvetica','normal');
+      let y = 26;
+      text.split('\n').forEach(line => {
+        if (y > 275) { doc.addPage(); y = 16; }
+        if (/^[A-Z\s]+:$|^SUBJECT:|^IN THE|^BEFORE THE|^LEGAL NOTICE/.test(line)) { doc.setFont('helvetica','bold'); doc.text(line,14,y); doc.setFont('helvetica','normal'); y+=6; }
+        else { doc.splitTextToSize(line||' ',182).forEach(wl=>{ if(y>275){doc.addPage();y=16;} doc.text(wl,14,y); y+=5; }); }
+      });
+      const pages = doc.internal.getNumberOfPages();
+      for(let i=1;i<=pages;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(160,160,160);doc.text(`LEXASSIST | ${today} | Page ${i} of ${pages}`,105,290,{align:'center'});}
+      const names = {fir:'FIR_Draft',notice:'Legal_Notice',bail:'Bail_Application',consumer:'Consumer_Complaint',rti:'RTI_Application'};
+      doc.save(`LEXASSIST_${names[currentDoc]}_${new Date().toISOString().split('T')[0]}.pdf`);
+      Toast.show('PDF downloaded successfully!','success');
+    };
+
+    updatePreview();
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Calendar – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cases.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div id="profileBadgeWrap"></div>
+      <a href="javascript:history.back()" class="btn btn-secondary btn-sm">← Back</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+        <div class="sidebar-name"  id="sidebarName">User</div>
+        <div class="sidebar-role"  id="sidebarRole">User</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Main</div>
+        <a href="/dashboard/citizen" class="sidebar-link"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"             class="sidebar-link"><span class="icon">📋</span>Cases</a>
+        <a href="/chatbot"           class="sidebar-link"><span class="icon">🤖</span>AI Chatbot</a>
+        <a href="/lawyers"           class="sidebar-link"><span class="icon">⚖️</span>Find Lawyers</a>
+        <a href="/appointments"      class="sidebar-link"><span class="icon">📅</span>Appointments</a>
+        <a href="/calendar"          class="sidebar-link"><span class="icon">🗓️</span>Calendar</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div><h1>🗓️ Legal Calendar</h1><p>All your hearings, appointments, and deadlines</p></div>
+          <button onclick="openModal('addEventModal')" class="btn btn-primary">➕ Add Event</button>
+        </div>
+      </div>
+
+      <div class="grid-2" style="align-items:start">
+        <!-- Calendar -->
+        <div class="card">
+          <div class="flex-between mb-16">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+            <div class="cal-month" id="calMonthLabel"></div>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+          </div>
+          <div class="day-names">
+            <div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div>
+            <div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <!-- Event type legend -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--ivory-dark)">
+            <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(220,38,38,0.18);display:inline-block"></span>Hearing</span>
+            <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(79,70,229,0.18);display:inline-block"></span>Appointment</span>
+            <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(217,119,6,0.18);display:inline-block"></span>Deadline</span>
+            <span style="font-size:0.72px;display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(22,163,74,0.12);display:inline-block"></span>Reminder</span>
+          </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="card">
+          <h3 style="margin-bottom:14px">📌 Upcoming Events</h3>
+          <div id="upcomingEvents">
+            <div class="text-center text-muted" style="padding:20px"><span class="loader dark"></span></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Event Modal -->
+  <div class="modal-overlay" id="addEventModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Add Calendar Event</div>
+        <button class="modal-close" onclick="closeModal('addEventModal')">✕</button>
+      </div>
+      <form id="addEventForm">
+        <div class="form-group"><label class="form-label">Event Title *</label><input type="text" id="evTitle" class="form-control" placeholder="e.g. Property case hearing" required></div>
+        <div class="form-group"><label class="form-label">Date & Time *</label><input type="datetime-local" id="evDate" class="form-control" required></div>
+        <div class="form-group"><label class="form-label">Event Type</label>
+          <select id="evType" class="form-control">
+            <option>Hearing</option><option>Appointment</option>
+            <option>Deadline</option><option>Reminder</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Description</label><textarea id="evDesc" class="form-control" rows="2" placeholder="Optional notes..."></textarea></div>
+        <button type="submit" id="evBtn" class="btn btn-primary btn-full">Add Event →</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard();
+    let currentYear  = new Date().getFullYear();
+    let currentMonth = new Date().getMonth();
+    let events       = [];
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    const loadEvents = async () => {
+      try {
+        const d = await API.get('/api/calendar');
+        events  = d.data || [];
+        renderCalendar();
+        renderUpcoming();
+      } catch(e) {}
+    };
+
+    const renderCalendar = () => {
+      document.getElementById('calMonthLabel').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+      const firstDay    = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+      const daysInPrev  = new Date(currentYear, currentMonth,  0).getDate();
+      const today       = new Date();
+      let   cells       = '';
+
+      // Prev month padding
+      for (let i=firstDay-1; i>=0; i--) {
+        cells += `<div class="cal-cell other-month"><div class="cal-date">${daysInPrev-i}</div></div>`;
+      }
+      // Current month
+      for (let d=1; d<=daysInMonth; d++) {
+        const isToday   = d===today.getDate() && currentMonth===today.getMonth() && currentYear===today.getFullYear();
+        const dayEvents = events.filter(e => { const ed=new Date(e.startDate); return ed.getDate()===d && ed.getMonth()===currentMonth && ed.getFullYear()===currentYear; });
+        const hasHearing    = dayEvents.some(e=>e.type==='Hearing'||e.type==='Deadline');
+        const hasAppointment= dayEvents.some(e=>e.type==='Appointment');
+        cells += `<div class="cal-cell ${isToday?'today':''}${hasHearing?' urgent':''}${!hasHearing&&hasAppointment?' has-event':''}" style="${hasHearing?'border-color:var(--danger);background:rgba(220,38,38,0.04)':''}${!hasHearing&&(dayEvents.length>0)?'border-color:var(--gold);background:rgba(201,168,76,0.04)':''}">
+          <div class="cal-date">${d}</div>
+          ${dayEvents.slice(0,2).map(e=>`<div class="cal-event event-${e.type}">${e.title}</div>`).join('')}
+          ${dayEvents.length>2?`<div style="font-size:0.62rem;color:var(--muted);margin-top:1px">+${dayEvents.length-2}</div>`:''}
+        </div>`;
+      }
+      // Next month padding
+      const used = firstDay + daysInMonth;
+      const left = 42 - used;
+      for (let d=1; d<=left; d++) {
+        cells += `<div class="cal-cell other-month"><div class="cal-date">${d}</div></div>`;
+      }
+      document.getElementById('calGrid').innerHTML = cells;
+    };
+
+    const renderUpcoming = () => {
+      const now      = new Date();
+      const upcoming = events.filter(e=>new Date(e.startDate)>=now).sort((a,b)=>new Date(a.startDate)-new Date(b.startDate)).slice(0,8);
+      const el       = document.getElementById('upcomingEvents');
+      el.innerHTML   = upcoming.length ? upcoming.map(e => {
+        const d = new Date(e.startDate);
+        const daysLeft = DateUtils.daysUntil(e.startDate);
+        return `<div style="padding:10px 0;border-bottom:1px solid var(--ivory-dark)">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+            <span class="cal-event event-${e.type}">${e.type}</span>
+            <span style="font-size:0.7rem;color:var(--muted)">${DateUtils.format(d)}</span>
+            ${daysLeft<=3?`<span style="font-size:0.68rem;font-weight:700;color:var(--danger)">In ${daysLeft}d</span>`:''}
+          </div>
+          <div style="font-size:0.875rem;font-weight:600;color:var(--navy)">${e.title}</div>
+        </div>`;
+      }).join('') : '<div class="text-center text-muted" style="padding:20px">No upcoming events</div>';
+    };
+
+    const changeMonth = dir => {
+      currentMonth += dir;
+      if (currentMonth>11){ currentMonth=0; currentYear++; }
+      if (currentMonth<0) { currentMonth=11; currentYear--; }
+      renderCalendar();
+    };
+
+    document.getElementById('addEventForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('evBtn');
+      btn.innerHTML='<span class="loader"></span> Adding...'; btn.disabled=true;
+      try {
+        const d = await API.post('/api/calendar', { title:document.getElementById('evTitle').value, startDate:document.getElementById('evDate').value, type:document.getElementById('evType').value, description:document.getElementById('evDesc').value });
+        if (d.success) { closeModal('addEventModal'); document.getElementById('addEventForm').reset(); loadEvents(); Toast.show('Event added!','success'); }
+        else Toast.show(d.message,'danger');
+      } catch(err) { Toast.show('Error adding event','danger'); }
+      btn.innerHTML='Add Event →'; btn.disabled=false;
+    });
+
+    loadEvents();
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

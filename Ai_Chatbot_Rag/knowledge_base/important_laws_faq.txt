@@ -1,0 +1,93 @@
+LEXASSIST — IMPORTANT INDIAN LAWS FAQ
+POCSO, Domestic Violence, Motor Vehicle, Divorce, Property, Labour
+============================================================
+
+Q: What is POCSO Act?
+A: POCSO (Protection of Children from Sexual Offences) Act 2012 protects children below 18 from sexual abuse. Key provisions: Penetrative sexual assault — minimum 10 years, may extend to life. Aggravated penetrative sexual assault — minimum 20 years. Sexual harassment of child — up to 3 years. Child pornography — up to 5 years. Special courts handle POCSO cases. Complaint can be made to police, SJPU (Special Juvenile Police Unit), or CHILDLINE (1098).
+
+---
+
+Q: What is domestic violence law in India?
+A: Protection of Women from Domestic Violence Act 2005 covers: Physical abuse, Sexual abuse, Emotional/verbal abuse, Economic abuse. WHO CAN FILE: Wife, live-in partner, daughter, mother, sister. HOW TO FILE: Approach Protection Officer (PO) in your district, or file directly in Magistrate court. RELIEF available: Protection order — stops abuser from entering home, Residence order — right to stay in shared home, Monetary relief — maintenance and compensation, Custody order — children's custody. HELPLINE: 181 (Women Helpline), 1091
+
+---
+
+Q: What is Section 498A IPC?
+A: Section 498A IPC deals with cruelty by husband or his relatives towards wife. Punishment: Up to 3 years imprisonment and fine. Cruelty means: 1. Wilful conduct likely to drive woman to suicide or cause danger to life, limb or health 2. Harassment to coerce her or her relatives to meet unlawful demand for property/dowry. This is a non-bailable, cognizable offence. To file: Go to police station and file FIR, or approach Magistrate directly under Section 200 CrPC.
+
+---
+
+Q: What is Motor Vehicle Act? What to do after accident?
+A: Motor Vehicle Act 1988 (Amended 2019) governs traffic and accidents. After an accident:
+1. Call police (100) and ambulance (108) immediately
+2. Don't move seriously injured people
+3. Note vehicle number, driver details, witnesses
+4. File FIR at nearest police station within 24 hours
+5. Claim compensation from Motor Accident Claims Tribunal (MACT)
+
+Compensation: Third party insurance is mandatory. No-fault compensation (hit and run): Up to ₹2 lakh (death), ₹50,000 (grievous hurt). New penalties 2019: Drunk driving — ₹10,000 or 6 months jail. Overspeeding — ₹1,000-₹2,000.
+
+---
+
+Q: How to file for divorce in India?
+A: MUTUAL CONSENT DIVORCE (Faster — 6-18 months):
+1. Both agree to divorce
+2. Must have lived separately for at least 1 year
+3. File joint petition in Family Court
+4. First motion hearing
+5. 6 months cooling period (court may waive)
+6. Second motion — divorce granted
+
+CONTESTED DIVORCE (Slower — 2-5 years):
+Grounds: Cruelty, Desertion (2+ years), Adultery, Conversion, Mental disorder, Leprosy
+File petition → notices sent → response → evidence → arguments → judgment
+
+Different personal laws apply: Hindu Marriage Act (Hindus, Sikhs, Buddhists, Jains), Muslim Personal Law, Indian Divorce Act (Christians), Special Marriage Act
+
+---
+
+Q: What is property registration? Is it mandatory?
+A: Under Registration Act 1908, all immovable property transactions above ₹100 MUST be registered. If not registered, the document is not admissible as evidence in court. Steps to register property:
+1. Prepare Sale Deed with all details
+2. Get it verified by a lawyer
+3. Pay Stamp Duty (3-10% of value, varies by state)
+4. Pay Registration Fee (1% of value, max ₹30,000 in most states)
+5. Visit Sub-Registrar office with seller and two witnesses
+6. Biometric verification and photo
+7. Registered document delivered within 7 working days
+
+Daughters have equal rights in ancestral property (Supreme Court 2020 judgment in Vineeta Sharma case).
+
+---
+
+Q: What is succession law in India? Who inherits property?
+A: HINDU SUCCESSION ACT 1956 (for Hindus, Sikhs, Buddhists, Jains):
+Class I heirs (get first priority): Son, daughter, widow, mother, son's son, son's daughter, son's widow, daughter's son, daughter's daughter.
+Daughters have EQUAL rights as sons in ancestral property since 2005 amendment.
+
+MUSLIM PERSONAL LAW (for Muslims):
+Female heirs get half the share of male heirs.
+
+INDIAN SUCCESSION ACT 1925 (for Christians, Parsis):
+Spouse gets 1/3, remaining goes to children.
+
+If person dies WITHOUT WILL: Property goes to legal heirs as per above laws.
+If person dies WITH WILL: Probate of will required from court.
+
+---
+
+Q: What is labour law in India? What are worker rights?
+A: KEY LABOUR LAWS:
+1. Minimum Wages Act 1948 — Every worker entitled to minimum wage fixed by state govt
+2. Payment of Wages Act 1936 — Wages must be paid on time, without unauthorized deductions
+3. Payment of Gratuity Act 1972 — After 5 years continuous service, gratuity = (Last salary × 15 × years)/26
+4. EPF Act 1952 — Both employer and employee contribute 12% each to provident fund
+5. Factories Act 1948 — Maximum 48 hours/week, overtime at double rate
+6. Industrial Disputes Act 1947 — Protects against wrongful termination
+
+WRONGFUL TERMINATION:
+File complaint with Labour Commissioner → Labour Court → High Court
+Online complaint: shramsuvidha.gov.in
+
+---
+

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .admin-login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#060d1a,#0d1b35,#1a2d50); padding:20px; }
+    .admin-box { background:#fff; border-radius:20px; padding:44px 40px; width:100%; max-width:400px; box-shadow:0 24px 80px rgba(0,0,0,0.4); }
+    .admin-logo { text-align:center; font-size:1.6rem; font-weight:900; letter-spacing:1px; margin-bottom:6px; }
+    .admin-logo span { color:#c9a84c; } .admin-logo em { color:#0d1b35; font-style:normal; }
+    .admin-badge { text-align:center; background:#0d1b35; color:#c9a84c; font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 16px; border-radius:50px; display:inline-block; margin-bottom:24px; }
+    .admin-title { text-align:center; font-size:1.3rem; font-weight:700; color:#0d1b35; margin-bottom:4px; }
+    .admin-sub   { text-align:center; font-size:0.82rem; color:#94a3b8; margin-bottom:24px; }
+    .eye-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1rem; }
+  </style>
+</head>
+<body>
+  <div class="admin-login-wrap">
+    <div class="admin-box">
+      <div class="admin-logo"><span>LEX</span><em>ASSIST</em></div>
+      <div style="text-align:center;margin-bottom:20px">
+        <span class="admin-badge">🛡️ Admin Portal</span>
+      </div>
+      <div class="admin-title">Admin Sign In</div>
+      <div class="admin-sub">Restricted access — administrators only</div>
+
+      <div id="msg" class="alert"></div>
+
+      <form id="adminLoginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Admin Email</label>
+          <input type="email" id="email" class="form-control" placeholder="admin@lexassist.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div style="position:relative">
+            <input type="password" id="password" class="form-control" placeholder="Admin password" style="padding-right:44px">
+            <button type="button" class="eye-btn" onclick="const i=document.getElementById('password');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁️':'🙈'">👁️</button>
+          </div>
+        </div>
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-full btn-lg" style="background:linear-gradient(135deg,#0d1b35,#1f3461);margin-top:8px">
+          Sign In as Admin →
+        </button>
+      </form>
+
+      <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid #f1f5f9">
+        <div style="font-size:0.72rem;color:#94a3b8">
+          This page is not publicly linked.<br>
+          For account issues contact system administrator.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Clear any existing session
+    const existing = localStorage.getItem('user');
+    if (existing) {
+      try {
+        const u = JSON.parse(existing);
+        if (u.role === 'admin') window.location.href = '/dashboard/admin';
+      } catch(e) {}
+    }
+
+    const showMsg = (txt, type='danger') => {
+      const el = document.getElementById('msg');
+      el.className = `alert alert-${type} show`;
+      el.innerHTML = txt;
+    };
+
+    document.getElementById('adminLoginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+      if (!email || !pass) { showMsg('Please enter email and password'); return; }
+
+      const btn = document.getElementById('loginBtn');
+      btn.innerHTML = '<span class="loader"></span> Signing in...';
+      btn.disabled  = true;
+
+      try {
+        const r = await fetch('/api/auth/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: pass })
+        });
+        const d = await r.json();
+
+        if (!d.success) {
+          showMsg(d.message);
+          btn.innerHTML = 'Sign In as Admin →';
+          btn.disabled  = false;
+          return;
+        }
+
+        localStorage.setItem('token', d.token);
+        localStorage.setItem('user',  JSON.stringify(d.data));
+        showMsg('✅ Welcome, Admin! Redirecting...', 'success');
+        setTimeout(() => window.location.href = '/dashboard/admin', 700);
+      } catch(err) {
+        showMsg('Connection error. Is the server running?');
+        btn.innerHTML = 'Sign In as Admin →';
+        btn.disabled  = false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+LEXASSIST — CODE OF CRIMINAL PROCEDURE (CrPC) REFERENCE
+Key CrPC sections explained simply
+============================================================
+
+Q: What is Section 41 CrPC? What does CrPC 41 say? Explain Section 41 of Code of Criminal Procedure.
+A: **Section 41 CrPC — When police may arrest without warrant**
+A police officer may arrest without warrant any person who commits a cognizable offence in the presence of the officer, or against whom a reasonable complaint has been made, or credible information has been received, or a reasonable suspicion exists.
+Section: 41
+Act: Code of Criminal Procedure (CrPC)
+Title: When police may arrest without warrant
+
+---
+
+Q: What is Section 57 CrPC? What does CrPC 57 say? Explain Section 57 of Code of Criminal Procedure.
+A: **Section 57 CrPC — Person arrested not to be detained more than 24 hours**
+No police officer shall detain in custody a person arrested without warrant for a longer period than 24 hours. Every person arrested must be produced before the nearest Magistrate within 24 hours.
+Section: 57
+Act: Code of Criminal Procedure (CrPC)
+Title: Person arrested not to be detained more than 24 hours
+
+---
+
+Q: What is Section 154 CrPC? What does CrPC 154 say? Explain Section 154 of Code of Criminal Procedure.
+A: **Section 154 CrPC — First Information Report (FIR)**
+Every information relating to the commission of a cognizable offence, if given orally to an officer in charge of a police station, shall be reduced to writing by him or under his direction. The informant shall sign it. The officer shall give the informant a copy of the FIR free of cost.
+Section: 154
+Act: Code of Criminal Procedure (CrPC)
+Title: First Information Report (FIR)
+
+---
+
+Q: What is Section 161 CrPC? What does CrPC 161 say? Explain Section 161 of Code of Criminal Procedure.
+A: **Section 161 CrPC — Examination of witnesses by police**
+Any police officer investigating a case may examine orally any person supposed to be acquainted with the facts and circumstances of the case. The person is bound to answer truly all questions put to them.
+Section: 161
+Act: Code of Criminal Procedure (CrPC)
+Title: Examination of witnesses by police
+
+---
+
+Q: What is Section 167 CrPC? What does CrPC 167 say? Explain Section 167 of Code of Criminal Procedure.
+A: **Section 167 CrPC — Procedure when investigation cannot be completed in 24 hours**
+If investigation cannot be completed within 24 hours, the police officer shall transmit to the nearest Judicial Magistrate a copy of the entries in the diary and produce the accused. The Magistrate may detain the accused for 15 days in custody.
+Section: 167
+Act: Code of Criminal Procedure (CrPC)
+Title: Procedure when investigation cannot be completed in 24 hours
+
+---
+
+Q: What is Section 197 CrPC? What does CrPC 197 say? Explain Section 197 of Code of Criminal Procedure.
+A: **Section 197 CrPC — Prosecution of Judges and public servants**
+When any person who is a Judge or Magistrate, or a public servant not removable from office without sanction of the Government, is accused of an offence alleged to have been committed while acting in discharge of official duty — no court shall take cognizance without previous sanction of the Government.
+Section: 197
+Act: Code of Criminal Procedure (CrPC)
+Title: Prosecution of Judges and public servants
+
+---
+
+Q: What is Section 313 CrPC? What does CrPC 313 say? Explain Section 313 of Code of Criminal Procedure.
+A: **Section 313 CrPC — Power to examine the accused**
+The court may at any stage of inquiry or trial examine the accused for the purpose of enabling them to explain any circumstances appearing in the evidence against them. The accused is not bound to be a witness.
+Section: 313
+Act: Code of Criminal Procedure (CrPC)
+Title: Power to examine the accused
+
+---
+
+Q: What is Section 374 CrPC? What does CrPC 374 say? Explain Section 374 of Code of Criminal Procedure.
+A: **Section 374 CrPC — Appeals from convictions**
+Any person convicted on a trial held by a High Court in its extraordinary original criminal jurisdiction may appeal to the Supreme Court. Any person convicted on a trial held by Sessions Judge may appeal to the High Court.
+Section: 374
+Act: Code of Criminal Procedure (CrPC)
+Title: Appeals from convictions
+
+---
+
+Q: What is Section 436 CrPC? What does CrPC 436 say? Explain Section 436 of Code of Criminal Procedure.
+A: **Section 436 CrPC — Bail in bailable offences**
+When any person other than a person accused of a non-bailable offence is arrested or detained without warrant, and is prepared to give bail, such person shall be released on bail. This is a right — police must grant bail for bailable offences.
+Section: 436
+Act: Code of Criminal Procedure (CrPC)
+Title: Bail in bailable offences
+
+---
+
+Q: What is Section 437 CrPC? What does CrPC 437 say? Explain Section 437 of Code of Criminal Procedure.
+A: **Section 437 CrPC — When bail may be taken in case of non-bailable offence**
+When any person accused of or suspected of the commission of a non-bailable offence is arrested or detained, may be released on bail by a court. The court shall refuse bail if there are reasonable grounds for believing the accused has committed an offence punishable with death or imprisonment for life.
+Section: 437
+Act: Code of Criminal Procedure (CrPC)
+Title: When bail may be taken in case of non-bailable offence
+
+---
+
+Q: What is Section 438 CrPC? What does CrPC 438 say? Explain Section 438 of Code of Criminal Procedure.
+A: **Section 438 CrPC — Direction for grant of bail to person apprehending arrest (Anticipatory Bail)**
+When any person has reason to believe that they may be arrested on accusation of having committed a non-bailable offence, they may apply to the High Court or the Sessions Court for anticipatory bail. If the Court grants the application, it may direct that in the event of such arrest, the person shall be released on bail.
+Section: 438
+Act: Code of Criminal Procedure (CrPC)
+Title: Direction for grant of bail to person apprehending arrest (Anticipatory Bail)
+
+---
+
+Q: What is Section 439 CrPC? What does CrPC 439 say? Explain Section 439 of Code of Criminal Procedure.
+A: **Section 439 CrPC — Special powers of High Court or Court of Session regarding bail**
+A High Court or Court of Session may direct that any person accused of an offence and in custody be released on bail and may impose any condition. The High Court or Court of Session may also set aside any condition imposed by a Magistrate when releasing any person on bail.
+Section: 439
+Act: Code of Criminal Procedure (CrPC)
+Title: Special powers of High Court or Court of Session regarding bail
+
+---
+

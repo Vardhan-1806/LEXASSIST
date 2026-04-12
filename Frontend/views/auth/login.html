@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .otp-wrap  { display:flex; gap:12px; justify-content:center; margin:18px 0; }
+    .otp-wrap input { width:54px; height:62px; text-align:center; font-size:1.6rem; font-weight:900; border:2.5px solid var(--ivory-dark); border-radius:12px; outline:none; color:var(--navy); transition:all 0.2s; font-family:'DM Sans',sans-serif; }
+    .otp-wrap input:focus { border-color:var(--gold); box-shadow:0 0 0 4px rgba(201,168,76,0.15); }
+    .otp-wrap input.filled { border-color:var(--navy); background:rgba(13,27,53,0.04); }
+    .eye-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1rem; padding:4px; }
+  </style>
+</head>
+<body class="auth-body">
+
+  <!-- ── STEP 1: Login Form ── -->
+  <div class="auth-box" id="loginBox">
+    <div class="auth-logo">LEX<span>ASSIST</span></div>
+    <h2 class="auth-title" style="margin-top:12px">Welcome Back</h2>
+    <p class="auth-subtitle">Sign in to access your dashboard</p>
+
+    <div id="msg" class="alert"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div style="position:relative">
+          <input type="password" id="password" class="form-control" placeholder="Your password" autocomplete="current-password" style="padding-right:44px">
+          <button type="button" class="eye-btn" onclick="toggleEye()">👁️</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:0.855rem;color:var(--muted)">
+          <input type="checkbox" id="rememberMe" style="width:16px;height:16px;accent-color:var(--gold)">
+          Remember email for 24 hours
+        </label>
+        <a href="/forgot-password" style="font-size:0.82rem;color:var(--gold);font-weight:600;text-decoration:none">Forgot password?</a>
+      </div>
+      <button type="submit" id="loginBtn" class="btn btn-primary btn-full btn-lg">Sign In →</button>
+    </form>
+
+
+    <div class="auth-footer">Don't have an account? <a href="/register">Register here</a></div>
+  </div>
+
+  <!-- ── STEP 2: OTP verification (if email not yet verified) ── -->
+  <div class="auth-box" id="otpBox" style="display:none">
+    <div class="auth-logo">LEX<span>ASSIST</span></div>
+    <div style="text-align:center;margin:18px 0">
+      <div style="font-size:3rem;margin-bottom:10px">📧</div>
+      <h2 class="auth-title">Verify Your Email</h2>
+      <p class="auth-subtitle">Enter the 4-digit code sent to<br><strong id="otpEmail" style="color:var(--navy)"></strong></p>
+    </div>
+
+    <div id="otpMsg" class="alert"></div>
+
+    <div class="otp-wrap">
+      <input type="text" maxlength="1" inputmode="numeric" id="oo0" oninput="omv(this,0)" onkeydown="obk(event,0)">
+      <input type="text" maxlength="1" inputmode="numeric" id="oo1" oninput="omv(this,1)" onkeydown="obk(event,1)">
+      <input type="text" maxlength="1" inputmode="numeric" id="oo2" oninput="omv(this,2)" onkeydown="obk(event,2)">
+      <input type="text" maxlength="1" inputmode="numeric" id="oo3" oninput="omv(this,3)" onkeydown="obk(event,3)">
+    </div>
+
+    <button onclick="verifyLoginOTP()" id="otpBtn" class="btn btn-primary btn-full btn-lg">Verify & Login →</button>
+
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+      <button onclick="resendLoginOTP()" class="btn btn-outline btn-sm">📧 Resend Code</button>
+      <button onclick="backToLogin()" style="background:none;border:none;color:var(--muted);font-size:0.82rem;cursor:pointer">← Back</button>
+    </div>
+  </div>
+
+  <script>
+    let pendingEmail = '';
+
+    // Auto-fill remembered email
+    (function() {
+      const saved = localStorage.getItem('lex_rem_email');
+      if (saved) {
+        document.getElementById('email').value = saved;
+        document.getElementById('rememberMe').checked = true;
+      }
+      // Show success message if redirected from verify
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('verified') === 'true') showMsg('✅ Email verified! You can now login.','success');
+      if (p.get('reset')    === 'true') showMsg('✅ Password reset! Please login.','success');
+    })();
+
+    function toggleEye() {
+      const i = document.getElementById('password');
+      const b = i.nextElementSibling;
+      i.type  = i.type==='password'?'text':'password';
+      b.textContent = i.type==='password'?'👁️':'🙈';
+    }
+
+    function showMsg(txt, type='danger', id='msg') {
+      const el = document.getElementById(id);
+      el.className = `alert alert-${type} show`;
+      el.innerHTML = txt;
+      el.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+
+    function fillDemo(email, pass) {
+      document.getElementById('email').value    = email;
+      document.getElementById('password').value = pass;
+      doLogin();
+    }
+
+    // ── Main login ────────────────────────────────────────────
+    document.getElementById('loginForm').addEventListener('submit', e => {
+      e.preventDefault();
+      doLogin();
+    });
+
+    async function doLogin() {
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+      if (!email || !pass) { showMsg('Please enter email and password'); return; }
+
+      const btn = document.getElementById('loginBtn');
+      btn.innerHTML = '<span class="loader"></span> Signing in...';
+      btn.disabled  = true;
+
+      try {
+        const r = await fetch('/api/auth/login', {
+          method:  'POST',
+          headers: {'Content-Type':'application/json'},
+          body:    JSON.stringify({ email, password:pass, rememberMe: document.getElementById('rememberMe').checked })
+        });
+        const d = await r.json();
+
+        if (!d.success) {
+          if (d.pendingVerification) {
+            showMsg(`⏳ <strong>Your lawyer profile is pending admin verification.</strong><br><br>You will receive an email at <strong>${email}</strong> once your Bar Council ID and credentials are approved by our admin team.<br><br>This usually takes 24-48 hours.`, 'warning');
+          } else if (d.rejected) {
+            showMsg(`❌ <strong>Profile Not Approved</strong><br>${d.message}`, 'danger');
+          } else if (d.requiresOTP) {
+            // Show OTP box
+            pendingEmail = d.email || email;
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('otpBox').style.display   = 'block';
+            document.getElementById('otpEmail').textContent   = pendingEmail;
+            showMsg('📧 A verification code has been sent to your email.', 'info', 'otpMsg');
+          } else {
+            showMsg(d.message || 'Invalid email or password');
+          }
+          btn.innerHTML = 'Sign In →';
+          btn.disabled  = false;
+          return;
+        }
+
+        // Handle remember me
+        if (document.getElementById('rememberMe').checked) {
+          localStorage.setItem('lex_rem_email', email);
+        } else {
+          localStorage.removeItem('lex_rem_email');
+        }
+
+        handleLoginSuccess(d);
+
+      } catch(err) {
+        showMsg('Connection error. Please check your internet connection.');
+        btn.innerHTML = 'Sign In →';
+        btn.disabled  = false;
+      }
+    }
+
+    function handleLoginSuccess(d) {
+      localStorage.setItem('token', d.token);
+      localStorage.setItem('user',  JSON.stringify(d.data));
+      showMsg('✅ Login successful! Redirecting...','success');
+      const role = d.data?.role || 'citizen';
+      setTimeout(() => {
+        window.location.href = role==='admin' ? '/dashboard/admin' :
+                               role==='lawyer'? '/dashboard/lawyer' : '/dashboard/citizen';
+      }, 600);
+    }
+
+    // ── OTP helpers ───────────────────────────────────────────
+    function omv(el, idx) {
+      el.value = el.value.replace(/\D/g,'');
+      el.classList.toggle('filled', el.value!=='');
+      if (el.value && idx < 3) document.getElementById('oo'+(idx+1)).focus();
+      if (idx===3 && el.value) verifyLoginOTP();
+    }
+    function obk(e,idx) {
+      if (e.key==='Backspace' && !e.target.value && idx>0)
+        document.getElementById('oo'+(idx-1)).focus();
+    }
+
+    async function verifyLoginOTP() {
+      const otp = [0,1,2,3].map(i=>document.getElementById('oo'+i).value).join('');
+      if (otp.length!==4) { showMsg('Enter all 4 digits','warning','otpMsg'); return; }
+
+      const btn = document.getElementById('otpBtn');
+      btn.innerHTML='<span class="loader"></span> Verifying...'; btn.disabled=true;
+
+      try {
+        const r = await fetch('/api/auth/verify-otp',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email:pendingEmail, otp })
+        });
+        const d = await r.json();
+
+        if (!d.success) {
+          showMsg(d.message,'danger','otpMsg');
+          btn.innerHTML='Verify & Login →'; btn.disabled=false;
+          return;
+        }
+        handleLoginSuccess(d);
+      } catch(e) {
+        showMsg('Server error. Please try again.','danger','otpMsg');
+        btn.innerHTML='Verify & Login →'; btn.disabled=false;
+      }
+    }
+
+    async function resendLoginOTP() {
+      try {
+        const r = await fetch('/api/auth/resend-otp',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({email:pendingEmail})
+        });
+        const d = await r.json();
+        showMsg(d.success?'✅ New code sent! Check inbox.':d.message, d.success?'success':'danger','otpMsg');
+        [0,1,2,3].forEach(i=>{const el=document.getElementById('oo'+i);el.value='';el.classList.remove('filled');});
+        document.getElementById('oo0').focus();
+      } catch(e) { showMsg('Error resending code.','danger','otpMsg'); }
+    }
+
+    function backToLogin() {
+      document.getElementById('otpBox').style.display   = 'none';
+      document.getElementById('loginBox').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

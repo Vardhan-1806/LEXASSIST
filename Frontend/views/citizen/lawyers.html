@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Lawyers – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cases.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <ul class="navbar-links">
+      <li><a href="/dashboard/citizen">Dashboard</a></li>
+      <li><a href="/cases">My Cases</a></li>
+      <li><a href="/chatbot">AI Chatbot</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="notif-bell" id="notifBell"><span>🔔</span><span class="notif-count" id="notifCount">0</span></div>
+      <div id="profileBadgeWrap"></div>
+      <a href="/login" onclick="Auth.logout();return false;" class="btn btn-secondary btn-sm">Logout</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <div id="notifDropdown" style="display:none;position:fixed;top:70px;right:16px;width:300px;background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:150;max-height:380px;overflow:hidden;border:1px solid var(--ivory-dark)">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--ivory-dark);display:flex;justify-content:space-between;align-items:center">
+      <strong style="color:var(--navy)">🔔 Notifications</strong>
+      <button onclick="NotifPanel.markAllRead()" style="font-size:0.72rem;padding:3px 9px;border:1px solid var(--ivory-dark);border-radius:50px;background:var(--white);cursor:pointer">Mark all read</button>
+    </div>
+    <div id="notifDropdownList" style="overflow-y:auto;max-height:300px"></div>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div style="padding-top:var(--navbar-h)">
+    <div class="search-hero">
+      <h2>⚖️ Find the Right Lawyer</h2>
+      <p style="color:rgba(255,255,255,0.65);margin-top:5px">Search from our network of verified lawyers across India</p>
+      <div class="search-bar-wrap">
+        <input type="text" id="filterCity" placeholder="📍 City" oninput="loadLawyers()">
+        <select id="filterSpec" onchange="loadLawyers()">
+          <option value="">All Specializations</option>
+          <option>Criminal</option><option>Civil</option><option>Family</option>
+          <option>Corporate</option><option>Property</option><option>Labour</option>
+          <option>Cyber</option><option>Taxation</option><option>Constitutional</option>
+        </select>
+        <select id="filterExp" onchange="loadLawyers()">
+          <option value="">Experience</option>
+          <option value="5">5+ years</option>
+          <option value="10">10+ years</option>
+          <option value="15">15+ years</option>
+        </select>
+        <button class="btn btn-primary" onclick="loadLawyers()">🔍 Search</button>
+      </div>
+    </div>
+
+    <div style="padding:24px 5%;max-width:1200px;margin:0 auto">
+      <div class="flex-between mb-16 flex-wrap gap-8">
+        <div id="resultsCount" class="text-muted" style="font-size:0.875rem"></div>
+      </div>
+      <div id="lawyersGrid" class="lawyers-grid"></div>
+      <div id="pagination" style="display:flex;justify-content:center;gap:7px;margin-top:24px;flex-wrap:wrap"></div>
+    </div>
+  </div>
+
+  <!-- Booking Modal — Court Purpose Only -->
+  <div class="modal-overlay" id="bookingModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="bookingTitle">📋 Book Lawyer for Court</div>
+        <button class="modal-close" onclick="closeModal('bookingModal')">✕</button>
+      </div>
+
+      <!-- Lawyer Contact Info -->
+      <div id="lawyerContactInfo" style="background:var(--ivory);border-radius:var(--radius);padding:14px;margin-bottom:18px">
+        <div style="font-size:0.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Lawyer Contact Details</div>
+        <div id="contactPhone" style="display:flex;align-items:center;gap:8px;font-size:0.875rem;color:var(--navy);margin-bottom:6px"></div>
+        <div id="contactEmail" style="display:flex;align-items:center;gap:8px;font-size:0.875rem;color:var(--navy)"></div>
+        <div style="font-size:0.74rem;color:var(--muted);margin-top:8px">📞 You may also contact directly before booking</div>
+      </div>
+
+      <form id="bookingForm">
+        <input type="hidden" id="bookLawyerId">
+
+        <div class="form-group">
+          <label class="form-label">Purpose of Booking</label>
+          <select id="bookType" class="form-control" required>
+            <option value="">Select purpose</option>
+            <option value="Court Argument">⚖️ Court Argument — Representation in court</option>
+            <option value="Court Preparation">📋 Court Preparation — Prepare case strategy</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Preferred Date *</label>
+          <input type="date" id="bookDate" class="form-control" onchange="loadSlots()" min="">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Available Time Slots</label>
+          <div class="slots-grid" id="slotsGrid">
+            <div style="grid-column:span 4;color:var(--muted);font-size:0.84rem">Select a date first</div>
+          </div>
+          <input type="hidden" id="selectedSlot">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Case Details / Notes</label>
+          <textarea id="bookNotes" class="form-control" rows="3" placeholder="Briefly describe your case and what you need help with..."></textarea>
+        </div>
+
+        <button type="submit" id="bookBtn" class="btn btn-primary btn-full">Confirm Court Booking →</button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Ask AI About Lawyer Modal -->
+  <div class="modal-overlay" id="askAIModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="askAITitle">🤖 Ask AI About This Lawyer</div>
+        <button class="modal-close" onclick="closeModal('askAIModal')">✕</button>
+      </div>
+      <p style="color:var(--muted);font-size:0.84rem;margin-bottom:16px">Select a question or type your own:</p>
+      <div id="suggestedPrompts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+      <div style="background:var(--ivory);border-radius:var(--radius);padding:14px;max-height:200px;overflow-y:auto" id="aiAnswerBox" style="display:none">
+        <div id="aiAnswer" style="font-size:0.875rem;color:var(--navy);line-height:1.6"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <input type="text" id="customAIQ" class="form-control" placeholder="Type your own question..." style="flex:1">
+        <button onclick="askCustomAI()" class="btn btn-primary btn-sm">Ask →</button>
+      </div>
+      <div style="margin-top:14px;text-align:center">
+        <a href="/chatbot" class="btn btn-outline btn-sm">Open Full AI Chatbot →</a>
+      </div>
+    </div>
+  </div>
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard();
+    document.getElementById('navName').textContent = Auth.user().name || '';
+
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    document.getElementById('bookDate').min = tomorrow.toISOString().split('T')[0];
+
+    const loadLawyers = async (page=1) => {
+      const params = new URLSearchParams({ page, limit:9 });
+      const spec = document.getElementById('filterSpec').value;
+      const city = document.getElementById('filterCity').value;
+      const exp  = document.getElementById('filterExp').value;
+      if (spec) params.append('specialization', spec);
+      if (city) params.append('city', city);
+      if (exp)  params.append('minExp', exp);
+
+      document.getElementById('lawyersGrid').innerHTML = '<div style="grid-column:span 3;text-align:center;padding:36px;color:var(--muted)"><span class="loader dark"></span> Loading lawyers...</div>';
+
+      try {
+        const d = await API.get(`/api/lawyers?${params}`);
+        document.getElementById('resultsCount').textContent = `${d.total||0} lawyers found`;
+
+        if (!d.data?.length) {
+          document.getElementById('lawyersGrid').innerHTML = '<div style="grid-column:span 3;text-align:center;padding:44px"><div style="font-size:2.5rem;margin-bottom:14px">🔍</div><h3>No lawyers found</h3><p>Try adjusting your filters or search a different city</p></div>';
+          return;
+        }
+
+        document.getElementById('lawyersGrid').innerHTML = d.data.map(l => `
+          <div class="lawyer-card">
+            <div class="lawyer-header">
+              <div class="lawyer-avatar">${(l.user?.name||'L')[0].toUpperCase()}</div>
+              <div style="min-width:0">
+                <div class="lawyer-name">${l.user?.name||'Lawyer'}</div>
+                <span class="verified-badge">✓ Verified</span>
+                <div class="stars" style="margin-top:5px">
+                  <span class="stars-text">${'★'.repeat(Math.round(l.aiRating||l.rating||0))}${'☆'.repeat(5-Math.round(l.aiRating||l.rating||0))}</span>
+                  <span class="stars-count">${(l.aiRating||l.rating||0).toFixed(1)} AI Rating (${l.totalReviews||0} reviews)</span>
+                </div>
+              </div>
+            </div>
+            <div class="spec-tags">${(l.specializations||[]).map(s=>`<span class="spec-tag">${s}</span>`).join('')}</div>
+            <div class="lawyer-info-row">
+              <span>💼 ${l.experience||0} yrs experience</span>
+              ${l.location?.city?`<span>📍 ${l.location.city}, ${l.location.state||''}</span>`:''}
+            </div>
+            ${l.bio?`<div class="lawyer-bio">${l.bio.slice(0,100)}${l.bio.length>100?'...':''}</div>`:''}
+            ${l.aiRatingBreakdown?.caseSuccessRate ? `<div style="font-size:0.76rem;color:var(--muted);margin-top:4px">📊 ${l.aiRatingBreakdown.caseSuccessRate}% success rate · ${l.closedCases||0} cases closed</div>` : ''}
+            <div class="lawyer-actions">
+              <button class="btn btn-primary btn-sm" onclick="openBooking('${l.user?._id||l._id}','${(l.user?.name||'Lawyer').replace(/'/g,'')}','${l.user?.phone||''}','${l.user?.email||''}')">📋 Book for Court</button>
+              <button class="btn btn-outline btn-sm" onclick="askAboutLawyer('${(l.user?.name||'Lawyer').replace(/'/g,\'\'')}','${(l.specializations||[]).join(', ')||'law'}','${l.experience||0}')">🤖 Ask AI</button>
+            </div>
+          </div>`).join('');
+
+        const pages = Math.ceil(d.total/9);
+        document.getElementById('pagination').innerHTML = pages > 1
+          ? Array.from({length:pages},(_,i)=>`<button onclick="loadLawyers(${i+1})" class="btn btn-sm ${i+1===page?'btn-primary':'btn-outline'}">${i+1}</button>`).join('')
+          : '';
+      } catch(e) {
+        document.getElementById('lawyersGrid').innerHTML = '<div class="alert alert-danger show">Error loading lawyers. Please refresh.</div>';
+      }
+    };
+
+    const openBooking = (lawyerId, name, phone, email) => {
+      document.getElementById('bookLawyerId').value = lawyerId;
+      document.getElementById('bookingTitle').textContent = `📋 Book ${name} for Court`;
+      document.getElementById('slotsGrid').innerHTML = '<div style="grid-column:span 4;color:var(--muted);font-size:0.84rem">Select a date first</div>';
+      document.getElementById('selectedSlot').value = '';
+      document.getElementById('contactPhone').innerHTML = phone ? `📞 <strong>${phone}</strong>` : '📞 Contact not provided';
+      document.getElementById('contactEmail').innerHTML = email ? `📧 <strong>${email}</strong>` : '📧 Contact not provided';
+      openModal('bookingModal');
+    };
+
+    const loadSlots = async () => {
+      const lawyerId = document.getElementById('bookLawyerId').value;
+      const date     = document.getElementById('bookDate').value;
+      if (!date) return;
+      try {
+        const d = await API.get(`/api/appointments/slots?lawyerId=${lawyerId}&date=${date}`);
+        const slots = d.data || [];
+        document.getElementById('slotsGrid').innerHTML = slots.length
+          ? slots.map(s=>`<div class="slot-btn" onclick="selectSlot('${s}',this)">${s}</div>`).join('')
+          : '<div style="grid-column:span 4;color:var(--muted);font-size:0.84rem">No slots available for this date. Try another date.</div>';
+        document.getElementById('selectedSlot').value = '';
+      } catch(e) {}
+    };
+
+    const selectSlot = (slot, el) => {
+      document.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('selectedSlot').value = slot;
+    };
+
+    document.getElementById('bookingForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const type = document.getElementById('bookType').value;
+      const slot = document.getElementById('selectedSlot').value;
+      if (!type) { Toast.show('Please select a purpose','warning'); return; }
+      if (!slot) { Toast.show('Please select a time slot','warning'); return; }
+      const btn = document.getElementById('bookBtn');
+      btn.innerHTML='<span class="loader"></span> Booking...'; btn.disabled=true;
+      try {
+        const d = await API.post('/api/appointments', {
+          lawyerId: document.getElementById('bookLawyerId').value,
+          date:     document.getElementById('bookDate').value,
+          timeSlot: { start:slot, end:String(parseInt(slot)+1).padStart(2,'0')+':00' },
+          type, notes: document.getElementById('bookNotes').value
+        });
+        if (d.success) {
+          closeModal('bookingModal');
+          Toast.show('Court appointment booked! Lawyer will be notified.','success');
+          document.getElementById('bookingForm').reset();
+        } else Toast.show(d.message,'danger');
+      } catch(err) { Toast.show('Server error','danger'); }
+      btn.innerHTML='Confirm Court Booking →'; btn.disabled=false;
+    });
+
+    // Ask AI about a specific lawyer
+    const askAboutLawyer = (name, specs, exp) => {
+      const prompts = [
+        `What type of cases does a ${specs} lawyer handle?`,
+        `How do I prepare for a ${specs} court case?`,
+        `What documents do I need for a ${specs} case?`,
+        `What questions should I ask my ${specs} lawyer?`,
+        `How long does a typical ${specs} case take in India?`,
+      ];
+      const encoded = encodeURIComponent(JSON.stringify({ lawyerName: name, specs, exp, prompts }));
+      window.location.href = `/chatbot?lawyer=${encoded}`;
+    };
+
+
+    let currentLawyerCtx = {};
+
+    const askAboutLawyer = (lawyerId, name, specs, exp, rating) => {
+      currentLawyerCtx = { lawyerId, name, specs, exp, rating };
+      document.getElementById('askAITitle').textContent = `🤖 Ask AI About ${name}`;
+      document.getElementById('aiAnswerBox').style.display = 'none';
+      document.getElementById('customAIQ').value = '';
+
+      const prompts = [
+        `What cases is ${name} experienced in?`,
+        `Is ${name} a good lawyer for ${specs.split(',')[0]} cases?`,
+        `With ${exp} years experience, how does ${name} compare?`,
+        `What should I ask ${name} before hiring them?`,
+        `What documents should I prepare for a ${specs.split(',')[0]} case?`,
+        `What are my rights in a ${specs.split(',')[0]} case?`,
+      ];
+
+      document.getElementById('suggestedPrompts').innerHTML = prompts.map(p =>
+        `<button onclick="askLawyerAI(\`${p}\`)" class="btn btn-outline btn-sm" style="text-align:left;padding:9px 14px;font-size:0.82rem;justify-content:flex-start">${p}</button>`
+      ).join('');
+
+      openModal('askAIModal');
+    };
+
+    const askLawyerAI = async (question) => {
+      const box = document.getElementById('aiAnswerBox');
+      const ans = document.getElementById('aiAnswer');
+      box.style.display = 'block';
+      ans.innerHTML = '<span class="loader dark"></span> Thinking...';
+
+      try {
+        const d = await API.post('/api/chatbot/message', {
+          message: question,
+          sessionId: 'lawyer-inquiry-' + currentLawyerCtx.lawyerId
+        });
+        if (d.success) {
+          ans.innerHTML = d.data.answer.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+        } else {
+          ans.innerHTML = 'Unable to get answer. <a href="/chatbot">Try full chatbot →</a>';
+        }
+      } catch(e) {
+        ans.innerHTML = 'Server error. <a href="/chatbot">Open full chatbot →</a>';
+      }
+    };
+
+    const askCustomAI = () => {
+      const q = document.getElementById('customAIQ').value.trim();
+      if (q) askLawyerAI(q);
+    };
+
+    document.getElementById('customAIQ').addEventListener('keydown', e => {
+      if (e.key === 'Enter') askCustomAI();
+    });
+
+    loadLawyers();
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointments – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cases.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div id="profileBadgeWrap"></div>
+      <a href="javascript:history.back()" class="btn btn-secondary btn-sm">← Back</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+        <div class="sidebar-name"  id="sidebarName">User</div>
+        <div class="sidebar-role"  id="sidebarRole">User</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Main</div>
+        <a href="/dashboard/citizen" class="sidebar-link"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"             class="sidebar-link"><span class="icon">📋</span>Cases</a>
+        <a href="/chatbot"           class="sidebar-link"><span class="icon">🤖</span>AI Chatbot</a>
+        <a href="/lawyers"           class="sidebar-link"><span class="icon">⚖️</span>Find Lawyers</a>
+        <a href="/appointments"      class="sidebar-link"><span class="icon">📅</span>Appointments</a>
+        <a href="/calendar"          class="sidebar-link"><span class="icon">🗓️</span>Calendar</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div><h1>📅 My Appointments</h1><p>All your consultations and bookings</p></div>
+          <a href="/lawyers" class="btn btn-primary">➕ Book New Appointment</a>
+        </div>
+      </div>
+
+      <!-- Filter Chips -->
+      <div class="filter-bar mb-16">
+        <div class="filter-chip active" onclick="filterAppts('all',this)">All</div>
+        <div class="filter-chip" onclick="filterAppts('Pending',this)">Pending</div>
+        <div class="filter-chip" onclick="filterAppts('Confirmed',this)">Confirmed</div>
+        <div class="filter-chip" onclick="filterAppts('Completed',this)">Completed</div>
+        <div class="filter-chip" onclick="filterAppts('Cancelled',this)">Cancelled</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Lawyer / Client</th>
+              <th>Type</th>
+              <th>Mode</th>
+              <th>Case</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="apptTableBody">
+            <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)"><span class="loader dark"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard();
+    const user = Auth.user();
+    let allAppts = [];
+
+    const renderAppts = (appts) => {
+      const tbody = document.getElementById('apptTableBody');
+      if (!appts.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No appointments yet. <a href="/lawyers" style="color:var(--gold)">Book a consultation</a></td></tr>`;
+        return;
+      }
+      tbody.innerHTML = appts.map(a => {
+        const d     = new Date(a.date);
+        const other = user.role==='citizen' ? a.lawyer?.name : a.citizen?.name;
+        const st    = (a.status||'pending').toLowerCase();
+        return `<tr>
+          <td>
+            <div class="appt-date">${DateUtils.format(d)}</div>
+            <div class="appt-time">${a.timeSlot?.start||''}</div>
+          </td>
+          <td>${other||'—'}</td>
+          <td>${a.type||'—'}</td>
+          <td>${a.mode||'—'}${a.meetingLink?` <a href="${a.meetingLink}" target="_blank" style="color:var(--gold);font-size:0.78rem;display:block">Join</a>`:''}</td>
+          <td style="font-size:0.8rem">${a.case?.title||a.case?.caseNumber||'—'}</td>
+          <td><span class="badge badge-${st}">${a.status}</span></td>
+          <td>
+            <div style="display:flex;gap:5px;flex-wrap:wrap">
+              ${a.status==='Pending'&&user.role==='lawyer'?`<button class="btn btn-primary btn-sm" onclick="updateAppt('${a._id}','Confirmed')">Confirm</button>`:''}
+              ${!['Cancelled','Completed'].includes(a.status)?`<button class="btn btn-sm" style="background:#fef2f2;color:var(--danger);border:none;cursor:pointer" onclick="updateAppt('${a._id}','Cancelled')">Cancel</button>`:''}
+              ${a.status==='Confirmed'&&user.role==='lawyer'?`<button class="btn btn-sm btn-outline" onclick="updateAppt('${a._id}','Completed')">Done</button>`:''}
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    };
+
+    const filterAppts = (f, el) => {
+      document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+      el.classList.add('active');
+      renderAppts(f==='all' ? allAppts : allAppts.filter(a=>a.status===f));
+    };
+
+    const loadAppts = async () => {
+      try {
+        const d = await API.get('/api/appointments');
+        allAppts = d.data || [];
+        renderAppts(allAppts);
+      } catch(e) {}
+    };
+
+    const updateAppt = async (id, status) => {
+      try {
+        const d = await API.put(`/api/appointments/${id}/status`, {status});
+        if (d.success) { Toast.show(`Appointment ${status.toLowerCase()}!`,'success'); loadAppts(); }
+        else Toast.show(d.message,'danger');
+      } catch(e) { Toast.show('Error updating appointment','danger'); }
+    };
+
+    loadAppts();
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cases.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div class="notif-bell" id="notifBell"><span>🔔</span><span class="notif-count" id="notifCount">0</span></div>
+      <div id="profileBadgeWrap"></div>
+      <a href="/login" onclick="Auth.logout();return false;" class="btn btn-secondary btn-sm">Logout</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <div id="notifDropdown" style="display:none;position:fixed;top:70px;right:16px;width:300px;background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:150;max-height:380px;overflow:hidden;border:1px solid var(--ivory-dark)">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--ivory-dark);display:flex;justify-content:space-between;align-items:center">
+      <strong style="color:var(--navy)">🔔 Notifications</strong>
+      <button onclick="NotifPanel.markAllRead()" style="font-size:0.72rem;padding:3px 9px;border:1px solid var(--ivory-dark);border-radius:50px;background:var(--white);cursor:pointer">Mark all read</button>
+    </div>
+    <div id="notifDropdownList" style="overflow-y:auto;max-height:300px"></div>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+        <div class="sidebar-name"  id="sidebarName">User</div>
+        <div class="sidebar-role"  id="sidebarRole">User</div>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav"></nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>👤 My Profile</h1>
+        <p>Manage your account information and security settings</p>
+      </div>
+
+      <div class="grid-2" style="align-items:start">
+        <!-- Profile Info -->
+        <div>
+          <div class="card mb-16">
+            <div class="flex-between mb-20">
+              <h3>Personal Information</h3>
+              <div id="profileBadge" style="font-size:0.74rem;font-weight:600;padding:4px 12px;border-radius:50px;background:rgba(201,168,76,0.12);color:var(--gold)"></div>
+            </div>
+            <div style="text-align:center;margin-bottom:22px">
+              <div id="bigAvatar" style="width:72px;height:72px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--navy);margin:0 auto 10px"></div>
+              <div id="profileUserId" style="font-size:0.76rem;font-family:monospace;color:var(--muted);background:var(--ivory);padding:3px 10px;border-radius:50px;display:inline-block"></div>
+            </div>
+            <div id="profileAlert" class="alert"></div>
+            <form id="profileForm">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="pName" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" id="pEmail" class="form-control" disabled style="background:var(--ivory);color:var(--muted)">
+                <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Email cannot be changed after verification</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="pPhone" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Address</label>
+                <textarea id="pAddress" class="form-control" rows="2"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bio</label>
+                <textarea id="pBio" class="form-control" rows="2" placeholder="Brief description about yourself..."></textarea>
+              </div>
+              <button type="submit" id="profileBtn" class="btn btn-primary">Save Changes</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div>
+          <div class="card mb-16">
+            <h3 style="margin-bottom:18px">🔐 Change Password</h3>
+            <div id="pwAlert" class="alert"></div>
+            <form id="pwForm">
+              <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <div style="position:relative">
+                  <input type="password" id="currentPw" class="form-control" placeholder="Your current password" style="padding-right:44px">
+                  <button type="button" onclick="togglePw('currentPw',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer">👁️</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">New Password</label>
+                <div style="position:relative">
+                  <input type="password" id="newPw" class="form-control" placeholder="Min 8 chars with Aa1!" style="padding-right:44px" oninput="checkPwStrength(this.value)">
+                  <button type="button" onclick="togglePw('newPw',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer">👁️</button>
+                </div>
+                <div id="pwStrengthBar" style="display:none;margin-top:5px">
+                  <div style="height:4px;background:var(--ivory-dark);border-radius:2px;overflow:hidden">
+                    <div id="pwFill" style="height:100%;border-radius:2px;transition:all 0.3s;width:0"></div>
+                  </div>
+                  <div id="pwHints" style="font-size:0.7rem;margin-top:4px;color:var(--muted)"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <div style="position:relative">
+                  <input type="password" id="confirmPw" class="form-control" placeholder="Re-enter new password" style="padding-right:44px">
+                  <button type="button" onclick="togglePw('confirmPw',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer">👁️</button>
+                </div>
+              </div>
+              <button type="submit" id="pwBtn" class="btn btn-dark">Update Password</button>
+            </form>
+          </div>
+
+          <!-- Account Info -->
+          <div class="card">
+            <h3 style="margin-bottom:16px">📊 Account Information</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:0.855rem">
+              <tr><td style="padding:8px 0;color:var(--muted)">User ID</td><td id="infoUserId" style="font-weight:600;color:var(--navy);font-family:monospace"></td></tr>
+              <tr><td style="padding:8px 0;color:var(--muted)">Role</td><td id="infoRole" style="font-weight:600;color:var(--navy);text-transform:capitalize"></td></tr>
+              <tr><td style="padding:8px 0;color:var(--muted)">Joined</td><td id="infoJoined" style="color:var(--navy)"></td></tr>
+              <tr><td style="padding:8px 0;color:var(--muted)">Last Login</td><td id="infoLastLogin" style="color:var(--navy)"></td></tr>
+              <tr><td style="padding:8px 0;color:var(--muted)">Email Status</td><td id="infoVerified"></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard();
+    const user = Auth.user();
+
+    // Build sidebar based on role
+    const sidebars = {
+      citizen: `<div class="sidebar-section">Main</div>
+        <a href="/dashboard/citizen" class="sidebar-link"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"             class="sidebar-link"><span class="icon">📋</span>My Cases</a>
+        <a href="/chatbot"           class="sidebar-link"><span class="icon">🤖</span>AI Chatbot</a>
+        <a href="/lawyers"           class="sidebar-link"><span class="icon">⚖️</span>Find Lawyers</a>
+        <a href="/profile"           class="sidebar-link active"><span class="icon">👤</span>My Profile</a>`,
+      lawyer: `<div class="sidebar-section">Cases</div>
+        <a href="/dashboard/lawyer" class="sidebar-link"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"            class="sidebar-link"><span class="icon">📋</span>Client Cases</a>
+        <a href="/appointments"     class="sidebar-link"><span class="icon">📅</span>Appointments</a>
+        <a href="/profile"          class="sidebar-link active"><span class="icon">👤</span>My Profile</a>`,
+    };
+    document.getElementById('sidebarNav').innerHTML = sidebars[user.role] || sidebars.citizen;
+
+    // Password strength
+    const checkPwStrength = (pwd) => {
+      const bar = document.getElementById('pwStrengthBar');
+      const fill= document.getElementById('pwFill');
+      const hints= document.getElementById('pwHints');
+      if (!pwd) { bar.style.display='none'; return; }
+      bar.style.display='block';
+      const checks = [pwd.length>=8, /[A-Z]/.test(pwd), /[a-z]/.test(pwd), /[0-9]/.test(pwd), /[!@#$%^&*]/.test(pwd)];
+      const pct    = (checks.filter(Boolean).length/5)*100;
+      fill.style.width = pct+'%';
+      fill.style.background = pct<=40?'#ef4444':pct<=70?'#f59e0b':'#16a34a';
+      hints.innerHTML = ['8+ chars','Uppercase','Lowercase','Number','Special char (!@#)'].map((l,i)=>`<span style="color:${checks[i]?'#16a34a':'#94a3b8'};margin-right:8px">${checks[i]?'✓':'✗'} ${l}</span>`).join('');
+    };
+
+    const togglePw = (id, btn) => {
+      const el = document.getElementById(id);
+      el.type  = el.type==='password'?'text':'password';
+      btn.textContent = el.type==='password'?'👁️':'🙈';
+    };
+
+    const loadProfile = async () => {
+      try {
+        const d = await API.get('/api/auth/me');
+        const u = d.data;
+        document.getElementById('bigAvatar').textContent   = (u.name||'U')[0].toUpperCase();
+        document.getElementById('profileUserId').textContent = u.userId || 'ID generating...';
+        document.getElementById('profileBadge').textContent  = u.role.toUpperCase();
+        document.getElementById('pName').value    = u.name || '';
+        document.getElementById('pEmail').value   = u.email || '';
+        document.getElementById('pPhone').value   = u.phone || '';
+        document.getElementById('pAddress').value = u.address || '';
+        document.getElementById('pBio').value     = u.bio || '';
+        document.getElementById('infoUserId').textContent   = u.userId || '—';
+        document.getElementById('infoRole').textContent     = u.role;
+        document.getElementById('infoJoined').textContent   = DateUtils.format(u.createdAt);
+        document.getElementById('infoLastLogin').textContent= u.lastLogin ? DateUtils.format(u.lastLogin) : 'First login';
+        document.getElementById('infoVerified').innerHTML   = u.isVerified
+          ? '<span style="color:var(--success);font-weight:600">✅ Verified</span>'
+          : '<span style="color:var(--danger);font-weight:600">❌ Not Verified</span>';
+      } catch(e) {}
+    };
+
+    document.getElementById('profileForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('profileBtn');
+      btn.innerHTML='<span class="loader"></span> Saving...'; btn.disabled=true;
+      const d = await API.put('/api/auth/update', { name:document.getElementById('pName').value, phone:document.getElementById('pPhone').value, address:document.getElementById('pAddress').value, bio:document.getElementById('pBio').value });
+      if (d.success) {
+        Toast.show('Profile updated!','success');
+        const u = Auth.user();
+        u.name = d.data.name;
+        localStorage.setItem('user', JSON.stringify(u));
+        document.getElementById('bigAvatar').textContent = (d.data.name||'U')[0].toUpperCase();
+      } else {
+        const el = document.getElementById('profileAlert');
+        el.className='alert alert-danger show'; el.textContent=d.message;
+      }
+      btn.innerHTML='Save Changes'; btn.disabled=false;
+    });
+
+    document.getElementById('pwForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const newPw = document.getElementById('newPw').value;
+      const confPw= document.getElementById('confirmPw').value;
+      const el    = document.getElementById('pwAlert');
+      if (newPw !== confPw) { el.className='alert alert-danger show'; el.textContent='Passwords do not match'; return; }
+      const btn = document.getElementById('pwBtn');
+      btn.innerHTML='<span class="loader"></span>'; btn.disabled=true;
+      const d = await API.put('/api/auth/change-password', { currentPassword:document.getElementById('currentPw').value, newPassword:newPw });
+      if (d.success) { Toast.show('Password changed!','success'); document.getElementById('pwForm').reset(); el.className='alert'; }
+      else { el.className='alert alert-danger show'; el.innerHTML=d.errors?d.errors.join('<br>'):d.message; }
+      btn.innerHTML='Update Password'; btn.disabled=false;
+    });
+
+    loadProfile();
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

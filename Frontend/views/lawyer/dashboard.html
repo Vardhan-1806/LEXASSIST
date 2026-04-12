@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Lawyer Dashboard – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div class="notif-bell" id="notifBell"><span>🔔</span><span class="notif-count" id="notifCount">0</span></div>
+      <div id="profileBadgeWrap"></div>
+    </div>
+  </nav>
+  <div id="notifDropdown" style="display:none;position:fixed;top:70px;right:16px;width:300px;background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:150;max-height:380px;overflow:hidden;border:1px solid var(--ivory-dark)">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--ivory-dark);display:flex;justify-content:space-between;align-items:center">
+      <strong>🔔 Notifications</strong>
+      <button onclick="NotifPanel.markAllRead()" style="font-size:0.7rem;padding:2px 8px;border:1px solid var(--ivory-dark);border-radius:50px;background:none;cursor:pointer">Mark all read</button>
+    </div>
+    <div id="notifDropdownList" style="overflow-y:auto;max-height:300px;padding:6px"></div>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user" style="cursor:pointer" onclick="window.location.href='/profile'" title="Click to edit profile">
+        <div class="sidebar-avatar" id="sidebarAvatar">L</div>
+        <div class="sidebar-name"  id="sidebarName">Lawyer</div>
+        <div class="sidebar-role"  style="color:#fbbf24">⚖️ Lawyer</div>
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:2px">Click to edit profile</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Cases</div>
+        <a href="/dashboard/lawyer" class="sidebar-link active"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"            class="sidebar-link"><span class="icon">📋</span>Client Cases</a>
+        <a href="/appointments"     class="sidebar-link"><span class="icon">📅</span>Appointments</a>
+        <a href="/calendar"         class="sidebar-link"><span class="icon">🗓️</span>Calendar</a>
+        <a href="/lawyer/documents" class="sidebar-link"><span class="icon">📂</span>Documents</a>
+        <div class="sidebar-section">Research</div>
+        <a href="/lawyers"          class="sidebar-link"><span class="icon">⚖️</span>Find Lawyers</a>
+        <a href="/similar-cases"    class="sidebar-link"><span class="icon">🔍</span>Case Research</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="welcome-banner">
+        <div>
+          <h2 id="lawyerWelcome">Good morning!</h2>
+          <p>Manage your client cases and upcoming appointments.</p>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+            <a href="/appointments" class="btn btn-primary btn-sm">📅 View Appointments</a>
+            <a href="/cases"        class="btn btn-secondary btn-sm">📋 Manage Cases</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid mb-16">
+        <div class="stat-card"><div class="stat-icon navy">👥</div><div><div class="stat-value" id="sTotal">—</div><div class="stat-label">Total Cases</div></div></div>
+        <div class="stat-card"><div class="stat-icon gold">⚡</div><div><div class="stat-value" id="sActive">—</div><div class="stat-label">Active Cases</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">🔴</div><div><div class="stat-value" id="sHigh">—</div><div class="stat-label">High Priority</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">📅</div><div><div class="stat-value" id="sAppts">—</div><div class="stat-label">Appointments</div></div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="flex-between mb-12">
+            <h4>🔴 Priority Cases</h4>
+            <a href="/cases" class="btn btn-outline btn-sm">All Cases</a>
+          </div>
+          <div id="priorityCases"><div class="text-center text-muted" style="padding:20px"><span class="loader dark"></span></div></div>
+        </div>
+        <div class="card">
+          <div class="flex-between mb-12">
+            <h4>📅 Upcoming Appointments</h4>
+            <a href="/appointments" class="btn btn-outline btn-sm">All</a>
+          </div>
+          <div id="upcomingAppts"><div class="text-center text-muted" style="padding:20px"><span class="loader dark"></span></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/global-enhancements.js"></script>
+  <script>
+    Auth.guard(['lawyer','admin']);
+    const user = Auth.user();
+    const h = new Date().getHours();
+    document.getElementById('lawyerWelcome').textContent = `Good ${h<12?'morning':h<17?'afternoon':'evening'}, ${user.name?.split(' ')[0]||''}!`;
+
+    const loadStats = async () => {
+      try {
+        const d = await API.get('/api/cases/stats');
+        if (!d.success) return;
+        document.getElementById('sTotal').textContent  = d.data.total;
+        document.getElementById('sActive').textContent = d.data.active;
+        document.getElementById('sHigh').textContent   = d.data.highPriority + d.data.critical;
+      } catch(e){}
+    };
+
+    const loadAppointments = async () => {
+      try {
+        const d = await API.get('/api/appointments?limit=5&status=Confirmed');
+        const el = document.getElementById('sAppts');
+        if (el && d.count !== undefined) el.textContent = d.count;
+        const ul = document.getElementById('upcomingAppts');
+        if (!d.data?.length) { ul.innerHTML='<div class="text-muted" style="padding:14px;text-align:center">No upcoming appointments</div>'; return; }
+        ul.innerHTML = d.data.map(a=>`
+          <div style="padding:9px 0;border-bottom:1px solid var(--ivory-dark);font-size:0.84rem">
+            <div style="font-weight:600;color:var(--navy)">${a.citizen?.name||'Client'}</div>
+            <div style="color:var(--muted);font-size:0.76rem">${new Date(a.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short'})} · ${a.timeSlot?.start} · ${a.type}</div>
+          </div>`).join('');
+      } catch(e){}
+    };
+
+    const loadPriority = async () => {
+      try {
+        const d = await API.get('/api/cases?priority=Critical&limit=3');
+        const el = document.getElementById('priorityCases');
+        if (!d.data?.length) {
+          const d2 = await API.get('/api/cases?priority=High&limit=3');
+          if (!d2.data?.length) { el.innerHTML='<div class="text-muted" style="padding:14px;text-align:center">No high priority cases 🎉</div>'; return; }
+          d.data = d2.data;
+        }
+        el.innerHTML = d.data.map(c=>`
+          <div style="padding:9px 0;border-bottom:1px solid var(--ivory-dark)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:600;font-size:0.875rem;color:var(--navy);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.title}</div>
+              <span class="badge badge-${(c.priority||'medium').toLowerCase()}" style="margin-left:8px;flex-shrink:0">${c.priority}</span>
+            </div>
+            <div style="font-size:0.74rem;color:var(--muted);margin-top:2px">${c.caseNumber} · ${c.citizen?.name||'Client'}${c.nextHearingDate?` · Hearing: ${new Date(c.nextHearingDate).toLocaleDateString('en-IN',{day:'2-digit',month:'short'})}`:''}</div>
+          </div>`).join('');
+      } catch(e){}
+    };
+
+    loadStats();
+    loadPriority();
+    loadAppointments();
+    NotifPanel.init();
+    setInterval(NotifPanel.poll, 20000);
+  </script>
+</body>
+</html>

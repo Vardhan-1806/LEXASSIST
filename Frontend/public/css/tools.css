@@ -1,0 +1,113 @@
+/* ============================================================
+   LEXASSIST — Tools Pages  |  tools.css
+   Doc Generator, Similar Cases, Legal Aid Checker
+   ============================================================ */
+
+/* ── Document Generator ────────────────────────────────────── */
+.doc-tabs           { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 22px; }
+.doc-tab            { padding: 8px 16px; border: 1.5px solid var(--ivory-dark); border-radius: 50px; cursor: pointer; font-size: 0.84rem; font-weight: 600; color: var(--muted); transition: var(--transition); background: var(--white); white-space: nowrap; }
+.doc-tab.active     { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.doc-tab:hover:not(.active) { border-color: var(--gold); color: var(--navy); }
+
+.doc-form-section   { display: none; }
+.doc-form-section.active { display: block; }
+
+.doc-form-icon      { font-size: 1.8rem; margin-bottom: 7px; }
+.doc-form-title     { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--navy); margin-bottom: 16px; }
+
+.info-notice        { background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); border-radius: var(--radius); padding: 11px 15px; font-size: 0.82rem; color: var(--navy); margin-bottom: 20px; display: flex; gap: 8px; align-items: flex-start; }
+
+.preview-box        { background: var(--ivory); border: 1.5px dashed var(--ivory-dark); border-radius: var(--radius-lg); padding: 20px; font-size: 0.84rem; line-height: 1.9; color: var(--text); white-space: pre-wrap; max-height: 480px; overflow-y: auto; font-family: 'DM Sans', monospace; -webkit-overflow-scrolling: touch; }
+.preview-sticky     { position: sticky; top: 0; }
+
+.doc-form-actions   { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+
+/* ── Similar Case Finder ────────────────────────────────────── */
+.search-wrap        { display: flex; gap: 10px; margin-bottom: 22px; }
+.search-wrap input  { flex: 1; padding: 12px 18px; border-radius: 50px; border: 1.5px solid var(--ivory-dark); font-family: 'DM Sans',sans-serif; font-size: 0.875rem; outline: none; transition: var(--transition); min-width: 0; }
+.search-wrap input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+
+.tip-chips          { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 22px; align-items: center; }
+.tip-chips-label    { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+.tip-chip           { padding: 6px 13px; background: var(--white); border: 1.5px solid var(--ivory-dark); border-radius: 50px; font-size: 0.78rem; cursor: pointer; color: var(--navy); transition: var(--transition); white-space: nowrap; }
+.tip-chip:hover     { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+
+.result-card        { background: var(--white); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--ivory-dark); margin-bottom: 14px; transition: var(--transition); }
+.result-card:hover  { border-color: var(--gold); box-shadow: var(--shadow); }
+.result-header      { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.result-case-num    { font-size: 0.7rem; color: var(--muted); margin-bottom: 3px; }
+.result-question    { font-family: 'Playfair Display', serif; font-size: 0.97rem; font-weight: 600; color: var(--navy); }
+.result-source-tag  { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); background: var(--ivory); padding: 3px 10px; border-radius: 50px; white-space: nowrap; flex-shrink: 0; }
+.result-answer      { font-size: 0.855rem; color: var(--muted); line-height: 1.7; }
+.result-context     { font-size: 0.76rem; color: var(--muted); background: var(--ivory); border-radius: var(--radius); padding: 9px 13px; margin-top: 10px; border-left: 3px solid var(--gold); }
+.relevance-bar      { height: 4px; background: var(--ivory-dark); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.relevance-fill     { height: 100%; background: linear-gradient(90deg, var(--navy), var(--gold)); border-radius: 2px; }
+.relevance-label    { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+.result-actions     { display: flex; gap: 7px; margin-top: 12px; flex-wrap: wrap; }
+
+.match-count        { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; }
+.no-results         { text-align: center; padding: 44px 20px; }
+.no-results-icon    { font-size: 2.8rem; margin-bottom: 14px; }
+
+/* ── Legal Aid Checker ──────────────────────────────────────── */
+.checker-wrap       { max-width: 640px; margin: 0 auto; }
+
+.step-indicator     { display: flex; gap: 0; margin-bottom: 30px; }
+.step-dot           { flex: 1; position: relative; text-align: center; }
+.step-dot::before   { content: ''; position: absolute; top: 15px; left: 50%; right: -50%; height: 2px; background: var(--ivory-dark); z-index: 0; }
+.step-dot:last-child::before { display: none; }
+.step-circle        { width: 30px; height: 30px; border-radius: 50%; background: var(--ivory-dark); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; margin: 0 auto; position: relative; z-index: 1; color: var(--muted); transition: var(--transition); }
+.step-dot.active .step-circle  { background: var(--navy); color: var(--white); }
+.step-dot.done .step-circle    { background: var(--gold); color: var(--navy); }
+.step-lbl           { font-size: 0.68rem; color: var(--muted); margin-top: 5px; }
+
+.q-card             { background: var(--white); border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow); display: none; animation: fadeUp 0.28s ease; }
+.q-card.active      { display: block; }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
+.q-num              { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); margin-bottom: 7px; }
+.q-text             { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--navy); margin-bottom: 22px; line-height: 1.4; }
+
+.options-grid       { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.option-btn         { padding: 14px 16px; border: 2px solid var(--ivory-dark); border-radius: var(--radius-lg); cursor: pointer; text-align: left; font-family: 'DM Sans',sans-serif; font-size: 0.875rem; font-weight: 500; color: var(--navy); background: var(--white); transition: var(--transition); }
+.option-btn:hover   { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+.option-icon        { font-size: 1.2rem; margin-bottom: 5px; display: block; }
+
+/* Result Card */
+.result-eligibility { background: var(--white); border-radius: var(--radius-lg); padding: 30px; box-shadow: var(--shadow); display: none; animation: fadeUp 0.3s ease; }
+.result-eligibility.show { display: block; }
+.eligibility-badge  { display: inline-flex; align-items: center; gap: 7px; padding: 10px 22px; border-radius: 50px; font-size: 0.95rem; font-weight: 700; margin-bottom: 22px; }
+.badge-eligible     { background: #f0fdf4; color: var(--success); border: 2px solid var(--success); }
+.badge-ineligible   { background: #fef2f2; color: var(--danger); border: 2px solid var(--danger); }
+
+.aid-info-box       { background: var(--ivory); border-radius: var(--radius); padding: 16px; margin: 14px 0; border-left: 4px solid var(--gold); }
+.aid-info-box h4    { color: var(--navy); margin-bottom: 7px; font-size: 0.9rem; }
+.aid-info-box p     { font-size: 0.84rem; margin: 0; line-height: 1.7; }
+
+.aid-steps          { font-size: 0.855rem; color: var(--muted); line-height: 2; padding-left: 18px; }
+
+.contact-grid       { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.contact-card       { background: var(--white); border: 1px solid var(--ivory-dark); border-radius: var(--radius); padding: 14px; text-align: center; }
+.contact-num        { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+.contact-lbl        { font-size: 0.74rem; color: var(--muted); margin-top: 2px; }
+
+.result-actions     { display: flex; gap: 10px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+
+/* Responsive */
+@media(max-width:768px){
+  .search-wrap        { flex-direction: column; }
+  .search-wrap input  { width: 100%; }
+  .search-wrap .btn   { width: 100%; }
+  .options-grid       { grid-template-columns: 1fr; }
+  .contact-grid       { grid-template-columns: 1fr 1fr; }
+  .doc-form-actions   { flex-direction: column; }
+  .doc-form-actions .btn { width: 100%; }
+  .preview-box        { max-height: 300px; }
+}
+@media(max-width:480px) {
+  .tip-chips          { gap: 5px; }
+  .q-card             { padding: 18px; }
+  .result-eligibility { padding: 18px; }
+  .contact-grid       { grid-template-columns: 1fr; }
+  .doc-tabs           { gap: 5px; }
+  .doc-tab            { padding: 7px 12px; font-size: 0.78rem; }
+}

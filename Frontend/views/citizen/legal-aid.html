@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Legal Aid Checker – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/tools.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <div class="navbar-actions">
+      <div id="profileBadgeWrap"></div>
+      <a href="/dashboard/citizen" class="btn btn-secondary btn-sm">← Dashboard</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+        <div class="sidebar-name" id="sidebarName">User</div>
+        <div class="sidebar-role" id="sidebarRole">Citizen</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Main</div>
+        <a href="/dashboard/citizen"  class="sidebar-link"><span class="icon">🏠</span>Dashboard</a>
+        <a href="/cases"              class="sidebar-link"><span class="icon">📋</span>My Cases</a>
+        <a href="/chatbot"            class="sidebar-link"><span class="icon">🤖</span>AI Chatbot</a>
+        <a href="/lawyers"            class="sidebar-link"><span class="icon">⚖️</span>Find Lawyers</a>
+        <div class="sidebar-section">Tools</div>
+        <a href="/documents/generate" class="sidebar-link"><span class="icon">📄</span>Doc Generator</a>
+        <a href="/similar-cases"      class="sidebar-link"><span class="icon">🔍</span>Similar Cases</a>
+        <a href="/legal-aid"          class="sidebar-link"><span class="icon">🆓</span>Free Legal Aid</a>
+        <a href="/profile"             class="sidebar-link"><span class="icon">👤</span>My Profile</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div class="page-header">
+        <h1>🆓 Free Legal Aid Checker</h1>
+        <p>Check if you qualify for completely FREE legal aid under NALSA in 3 simple steps</p>
+      </div>
+      <div class="checker-wrap">
+        <div class="step-indicator">
+          <div class="step-dot active" id="step-0"><div class="step-circle">1</div><div class="step-lbl">Category</div></div>
+          <div class="step-dot" id="step-1"><div class="step-circle">2</div><div class="step-lbl">Income</div></div>
+          <div class="step-dot" id="step-2"><div class="step-circle">3</div><div class="step-lbl">Situation</div></div>
+          <div class="step-dot" id="step-3"><div class="step-circle">✓</div><div class="step-lbl">Result</div></div>
+        </div>
+
+        <div class="q-card active" id="q0">
+          <div class="q-num">Question 1 of 3</div>
+          <div class="q-text">Which category do you belong to?</div>
+          <div class="options-grid">
+            <button class="option-btn" onclick="ans(0,'sc_st')"><span class="option-icon">📛</span>SC / ST</button>
+            <button class="option-btn" onclick="ans(0,'woman_child')"><span class="option-icon">👩</span>Woman or Child</button>
+            <button class="option-btn" onclick="ans(0,'disabled')"><span class="option-icon">♿</span>Person with Disability</button>
+            <button class="option-btn" onclick="ans(0,'victim')"><span class="option-icon">🆘</span>Victim of disaster / trafficking</button>
+            <button class="option-btn" onclick="ans(0,'custody')"><span class="option-icon">🔒</span>In custody / Undertrial</button>
+            <button class="option-btn" onclick="ans(0,'general')"><span class="option-icon">👤</span>None of the above</button>
+          </div>
+        </div>
+
+        <div class="q-card" id="q1">
+          <div class="q-num">Question 2 of 3</div>
+          <div class="q-text">What is your annual household income?</div>
+          <div class="options-grid">
+            <button class="option-btn" onclick="ans(1,'below_1l')"><span class="option-icon">💰</span>Below ₹1 Lakh/year</button>
+            <button class="option-btn" onclick="ans(1,'1l_3l')"><span class="option-icon">💵</span>₹1 Lakh – ₹3 Lakh</button>
+            <button class="option-btn" onclick="ans(1,'above_3l')"><span class="option-icon">💳</span>Above ₹3 Lakh</button>
+            <button class="option-btn" onclick="ans(1,'no_income')"><span class="option-icon">📭</span>No fixed income / Unemployed</button>
+          </div>
+        </div>
+
+        <div class="q-card" id="q2">
+          <div class="q-num">Question 3 of 3</div>
+          <div class="q-text">What is your current legal situation?</div>
+          <div class="options-grid">
+            <button class="option-btn" onclick="ans(2,'criminal')"><span class="option-icon">⚖️</span>Criminal case / FIR against me</button>
+            <button class="option-btn" onclick="ans(2,'civil')"><span class="option-icon">🏠</span>Civil / Property / Family dispute</button>
+            <button class="option-btn" onclick="ans(2,'labour')"><span class="option-icon">👷</span>Labour / Employment issue</button>
+            <button class="option-btn" onclick="ans(2,'rights')"><span class="option-icon">📜</span>Rights violation / Wrongful detention</button>
+            <button class="option-btn" onclick="ans(2,'other')"><span class="option-icon">❓</span>Other legal matter</button>
+          </div>
+        </div>
+
+        <div class="result-eligibility" id="resultCard">
+          <div id="resultContent"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard();
+    const answers = {};
+
+    const ans = (q, val) => {
+      answers[q] = val;
+      document.getElementById(`step-${q}`).classList.remove('active');
+      document.getElementById(`step-${q}`).classList.add('done');
+      if (q < 2) {
+        document.getElementById(`q${q}`).classList.remove('active');
+        document.getElementById(`q${q+1}`).classList.add('active');
+        document.getElementById(`step-${q+1}`).classList.add('active');
+      } else {
+        document.getElementById(`q${q}`).classList.remove('active');
+        document.getElementById('step-3').classList.add('done');
+        showResult();
+      }
+    };
+
+    const showResult = () => {
+      const rc = document.getElementById('resultCard');
+      rc.classList.add('show');
+
+      const cat  = answers[0], income = answers[1], sit = answers[2];
+      let eligible = false, reason = '', type = '';
+
+      if (['sc_st','woman_child','disabled','victim','custody'].includes(cat)) {
+        eligible = true;
+        const r = { sc_st:'SC/ST individuals are entitled to free legal aid under Section 12(c) of the Legal Services Authorities Act.', woman_child:'Women and children are entitled to free legal aid regardless of income under Section 12(b).', disabled:'Persons with disability are entitled under Section 12(d).', victim:'Victims of disasters, mass violence or trafficking are entitled under Section 12(f).', custody:'Persons in custody are entitled under Section 12(g) — you have the RIGHT to a free lawyer immediately.' };
+        reason = r[cat]; type = 'Category-based eligibility';
+      } else if (income === 'below_1l' || income === 'no_income') {
+        eligible = true;
+        reason = 'Your income qualifies for free legal aid under Section 12(h) — persons with annual income below ₹1 lakh are eligible.';
+        type = 'Income-based eligibility';
+      } else if (income === '1l_3l') {
+        eligible = true;
+        reason = 'Your income may qualify depending on your state. Many states extend eligibility up to ₹3 lakh annual income. Contact your State Legal Services Authority.';
+        type = 'Possible eligibility (state-dependent)';
+      } else {
+        eligible = false;
+        reason = 'Based on your responses, you may not qualify for completely free legal aid under NALSA. However, you can still access Lok Adalat (free & fast dispute resolution) services.';
+        type = 'May not qualify';
+      }
+
+      const sitHelp = {
+        criminal:'🔴 If you cannot afford a lawyer, the court MUST appoint one for you before trial (Section 304 CrPC). Tell the judge immediately.',
+        civil:'🏠 Civil matters: Lok Adalat can resolve your case faster and cheaper. Contact your District Legal Services Authority.',
+        labour:'👷 Labour matter: File complaint free at Labour Commissioner office. DLSA also provides legal aid.',
+        rights:'📜 Rights violation: File writ petition in High Court (Article 226). Free legal aid available.',
+        other:'Contact your nearest DLSA for guidance on your specific matter.'
+      };
+
+      document.getElementById('resultContent').innerHTML = `
+        <div class="text-center mb-16">
+          <div class="eligibility-badge ${eligible?'badge-eligible':'badge-ineligible'}">${eligible?'✅ You Qualify for Free Legal Aid!':'❌ May Not Qualify for Free Aid'}</div>
+        </div>
+        <div class="aid-info-box"><h4>${type}</h4><p>${reason}</p></div>
+        ${sitHelp[sit]?`<div class="aid-info-box" style="border-color:var(--navy)"><p>${sitHelp[sit]}</p></div>`:''}
+        <div style="margin-top:20px">
+          <h4 style="color:var(--navy);margin-bottom:12px;font-size:0.95rem">📞 How to Apply for Free Legal Aid</h4>
+          <ol class="aid-steps">
+            <li>Visit your nearest <strong>District Legal Services Authority (DLSA)</strong> office</li>
+            <li>Call NALSA toll-free: <strong>15100</strong></li>
+            <li>Apply online at <a href="https://nalsa.gov.in" target="_blank" style="color:var(--gold)">nalsa.gov.in</a></li>
+            <li>At police station or court — inform judge/officer you need a free lawyer</li>
+          </ol>
+        </div>
+        <div class="contact-grid">
+          <div class="contact-card"><div class="contact-num">15100</div><div class="contact-lbl">NALSA Free Legal Aid</div></div>
+          <div class="contact-card"><div class="contact-num">112</div><div class="contact-lbl">Police Emergency</div></div>
+          <div class="contact-card"><div class="contact-num">181</div><div class="contact-lbl">Women Helpline</div></div>
+          <div class="contact-card"><div class="contact-num">1930</div><div class="contact-lbl">Cyber Crime</div></div>
+        </div>
+        <div class="result-actions">
+          <a href="/lawyers" class="btn btn-primary">Find Verified Lawyers</a>
+          <button onclick="reset()" class="btn btn-outline">Check Again</button>
+          <a href="/chatbot" class="btn btn-dark">🤖 Ask AI</a>
+        </div>`;
+    };
+
+    const reset = () => {
+      Object.keys(answers).forEach(k=>delete answers[k]);
+      document.querySelectorAll('.q-card').forEach(c=>c.classList.remove('active'));
+      document.getElementById('q0').classList.add('active');
+      document.getElementById('resultCard').classList.remove('show');
+      document.querySelectorAll('.step-dot').forEach((d,i)=>{ d.classList.remove('done','active'); if(i===0)d.classList.add('active'); });
+    };
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

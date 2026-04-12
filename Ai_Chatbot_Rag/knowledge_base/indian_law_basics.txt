@@ -1,0 +1,139 @@
+LEXASSIST LEGAL KNOWLEDGE BASE – Indian Law Basics
+=====================================================
+
+## BAIL LAW (CrPC)
+Bail is the temporary release of an accused person awaiting trial, in exchange for security or surety.
+
+Bailable Offences (Section 436 CrPC): Bail is a matter of right for bailable offences. Police or court must grant bail.
+
+Non-Bailable Offences (Section 437 CrPC): Bail is at the court's discretion. Factors considered:
+- Nature and gravity of the accusation
+- Antecedents of the accused
+- Possibility of fleeing from justice
+- Likelihood of tampering with evidence
+
+Anticipatory Bail (Section 438 CrPC): A person can apply for bail in anticipation of arrest. Filed in Sessions Court or High Court.
+
+Bail in High Court/Supreme Court: If lower courts deny bail, higher courts can be approached. Supreme Court grants bail under Article 32 and Section 439 CrPC.
+
+## FIR (FIRST INFORMATION REPORT)
+An FIR is a written document prepared by police when they receive information about a cognizable offence under Section 154 CrPC.
+
+How to file FIR:
+1. Visit the nearest police station
+2. Give information to the Station House Officer (SHO)
+3. Police must register FIR for cognizable offences
+4. If police refuse, approach the Superintendent of Police or file a complaint before a Judicial Magistrate under Section 156(3) CrPC
+5. You can also send a registered letter to SP/DSP if police refuse to register FIR
+
+Zero FIR: Can be filed at any police station regardless of jurisdiction. Must be transferred to the appropriate police station.
+
+## DIVORCE LAW (Hindu Marriage Act 1955)
+Mutual Consent Divorce (Section 13B): 
+- Both parties must agree
+- Must have lived separately for at least 1 year
+- First motion petition filed
+- 6 months cooling period (court may waive in some cases)
+- Second motion filed to confirm divorce
+- Decree granted by Family Court
+
+Contested Divorce (Section 13): Grounds include:
+- Cruelty (mental or physical)
+- Desertion for 2 or more years
+- Conversion to another religion
+- Unsound mind / mental disorder
+- Leprosy or venereal disease
+- Renunciation of the world
+- Presumed dead (7 years missing)
+
+For Muslim couples: Divorce governed by Muslim Personal Law, Dissolution of Muslim Marriages Act 1939.
+For Christian couples: Indian Divorce Act 1869 applies.
+
+## CONSUMER PROTECTION ACT 2019
+Forum jurisdiction based on claim value:
+- District Consumer Disputes Redressal Commission: Claims up to ₹1 crore
+- State Consumer Disputes Redressal Commission: Claims ₹1 crore to ₹10 crore
+- National Consumer Disputes Redressal Commission: Claims above ₹10 crore
+
+How to file consumer complaint:
+1. Send legal notice to seller/company first (recommended)
+2. File complaint within 2 years of cause of action
+3. Complaint must include: name/address of complainant, description of deficiency, relief sought
+4. Pay prescribed court fees
+5. Attach all evidence: purchase receipts, warranty cards, communication records
+
+Online complaints can be filed at: edaakhil.nic.in
+
+## PROPERTY LAW
+Types of property disputes:
+- Boundary disputes
+- Title disputes
+- Inheritance/succession disputes
+- Landlord-tenant disputes
+- Encroachment
+
+Registration Act 1908: All immovable property transactions above ₹100 must be registered at Sub-Registrar's office.
+
+Transfer of Property Act 1882: Governs sale, mortgage, lease, gift of property.
+
+Limitation period to file property suit: Generally 12 years for possession; 3 years for money recovery.
+
+## RTI (RIGHT TO INFORMATION ACT 2005)
+Any citizen can request information from public authorities.
+
+How to file RTI:
+1. Write application to Public Information Officer (PIO) of the concerned department
+2. Pay fee: ₹10 (Central Govt), varies for State Govt
+3. Response must come within 30 days (48 hours for life/liberty matters)
+4. First Appeal to Appellate Authority within 30 days if unsatisfied
+5. Second Appeal to Central/State Information Commission within 90 days
+
+## PIL (PUBLIC INTEREST LITIGATION)
+A PIL can be filed by any citizen for matters of public interest.
+
+Filed in:
+- High Court under Article 226
+- Supreme Court under Article 32
+
+No court fees for PILs in most cases.
+Court can take suo motu cognizance of public interest matters.
+
+## LABOUR LAW
+Key laws:
+- Industrial Disputes Act 1947
+- Factories Act 1948
+- Minimum Wages Act 1948
+- Payment of Gratuity Act 1972
+- Employees' Provident Funds Act 1952
+- POSH Act 2013 (Sexual harassment at workplace)
+
+Grievance for wrongful termination:
+1. File complaint with Labour Commissioner
+2. Approach Labour Court
+3. File writ petition in High Court if fundamental rights violated
+
+## CYBER LAW (IT ACT 2000)
+Common cyber offences:
+- Section 66: Computer related offences (hacking) – 3 years imprisonment
+- Section 66C: Identity theft – 3 years imprisonment + ₹1 lakh fine
+- Section 66D: Cheating by impersonation using computer – 3 years + ₹1 lakh fine
+- Section 67: Publishing obscene material online
+- Section 72: Breach of confidentiality and privacy
+
+File cybercrime complaint:
+- Visit cybercrime.gov.in (National Cybercrime Reporting Portal)
+- Visit local cyber crime cell
+- File FIR at nearest police station
+
+## LEGAL AID
+Free legal aid is available to:
+- Women and children
+- Scheduled Castes/Scheduled Tribes
+- Persons with disabilities
+- Victims of trafficking
+- Persons in custody
+- Persons with annual income below ₹1 lakh (varies by state)
+
+Contact: District Legal Services Authority (DLSA) in your district.
+National Legal Services Authority: nalsa.gov.in
+Toll-free: 15100

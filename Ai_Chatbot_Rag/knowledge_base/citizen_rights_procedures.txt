@@ -1,0 +1,173 @@
+LEXASSIST KNOWLEDGE BASE – Legal Procedures & Citizen Rights
+=============================================================
+
+## FUNDAMENTAL RIGHTS (Constitution of India)
+
+Article 14 – Right to Equality
+All persons are equal before law and entitled to equal protection of laws.
+
+Article 19 – Right to Freedom
+Includes freedom of speech, expression, assembly, movement, profession.
+
+Article 21 – Right to Life and Personal Liberty
+No person shall be deprived of life or personal liberty except according to procedure established by law.
+This includes: right to live with dignity, right to education, right to health, right to privacy (Puttaswamy judgment 2017).
+
+Article 22 – Protection Against Arrest and Detention
+- Must be informed of grounds of arrest
+- Right to consult a lawyer of your choice
+- Must be produced before magistrate within 24 hours of arrest
+- Cannot be detained beyond 24 hours without magistrate's order
+
+Article 32 – Right to Constitutional Remedies
+Right to move Supreme Court for enforcement of fundamental rights (Dr. B.R. Ambedkar called this the heart of Constitution).
+
+## ARREST RIGHTS
+
+What police MUST do when arresting you:
+1. Inform you of the reason for arrest
+2. Allow you to inform a relative or friend
+3. Produce you before a magistrate within 24 hours (Section 57 CrPC)
+4. Medical examination before and after custody
+5. Memo of arrest signed by witness
+
+What you have the RIGHT to do when arrested:
+1. Remain silent (you cannot be forced to be a witness against yourself – Article 20)
+2. Call a lawyer immediately
+3. Call a family member
+4. Know the charges against you
+5. Apply for bail
+
+D.K. Basu Guidelines (Supreme Court):
+- Police must wear name tags
+- Arrest memo must be prepared
+- Time and place of interrogation must be recorded
+
+## WOMEN'S LEGAL RIGHTS
+
+Domestic Violence: Protection of Women from Domestic Violence Act 2005
+- Includes physical, emotional, economic, sexual abuse
+- File complaint with Protection Officer, Magistrate, or police station
+- Can seek protection order, residence order, monetary relief
+
+Sexual Harassment at Workplace (POSH Act 2013):
+- Internal Complaints Committee (ICC) in organizations with 10+ employees
+- Local Complaints Committee for unorganized sector
+- Complaint must be filed within 3 months
+
+Dowry Harassment (Section 498A IPC):
+- Harassment for dowry demand is a non-bailable offence
+- File FIR at any police station
+- Can be filed by woman, her parents, relatives, or any person
+
+Maternity Benefits:
+- 26 weeks paid maternity leave for first two children (Maternity Benefit Act 2017)
+- Available for organizations with 10+ employees
+
+## PROPERTY RIGHTS
+
+Hindu Succession Act 1956 (as amended 2005):
+- Daughters have equal right in ancestral property as sons
+- This applies even if father died before 2005 (Vineeta Sharma judgment 2020)
+- Married women have equal rights in parental property
+
+Tenant Rights (Rent Control Acts):
+- Cannot be evicted without due legal process
+- Landlord must give proper notice (usually 15-30 days for month-to-month tenancy)
+- Rent cannot be increased arbitrarily (varies by state Rent Control Act)
+
+Property Registration:
+- Sale deed must be registered within 4 months of execution
+- Registration fee: 1% of property value (varies by state)
+- Stamp duty: Varies by state (3-10% of property value)
+
+## LABOUR RIGHTS
+
+Minimum Wages:
+- Every worker entitled to minimum wage as notified by respective state government
+- Complaint to Labour Commissioner if not paid
+
+Gratuity (Payment of Gratuity Act 1972):
+- Eligible after 5 years of continuous service
+- Formula: (Last drawn salary × 15/26) × Number of years of service
+- Payable within 30 days of leaving service
+
+Provident Fund (EPF Act 1952):
+- Both employer and employee contribute 12% each
+- Can be claimed on retirement, resignation (after 2 months unemployment), or medical emergency
+
+Wrongful Termination:
+- Industrial Disputes Act protects workers in organizations with 100+ employees from retrenchment without government permission
+- Others can file civil suit for breach of contract
+- MSME sector workers can approach Labour Court
+
+## CONSUMER RIGHTS
+
+Six Consumer Rights:
+1. Right to Safety
+2. Right to be Informed
+3. Right to Choose
+4. Right to be Heard
+5. Right to Redress
+6. Right to Consumer Education
+
+Filing Consumer Complaint:
+1. Send written complaint/legal notice to company
+2. File complaint at edaakhil.nic.in or visit Consumer Forum
+3. Pay court fee (₹100-5000 depending on claim amount)
+4. Attach: purchase documents, complaint copy, communication records
+5. Forum may direct: refund, replacement, compensation, or punitive damages
+
+Limitation period: 2 years from date of cause of action
+
+## LEGAL AID & FREE SERVICES
+
+National Legal Services Authority (NALSA):
+- Website: nalsa.gov.in
+- Toll-free: 15100
+- Free legal services for eligible persons
+
+Lok Adalat (People's Court):
+- Alternative dispute resolution
+- Settlement is final and binding
+- No court fees, fast resolution
+- Suitable for: motor accident claims, matrimonial disputes, labour disputes, land acquisition
+
+Nyaya Mitra Scheme:
+- Helps undertrials in getting bail and legal assistance
+
+Tele Law Service:
+- Common Service Centres (CSC) provide free legal advice via video conference
+- Available in rural areas
+
+## CYBER CRIME REPORTING
+
+For online fraud, hacking, cyberbullying:
+1. Visit cybercrime.gov.in
+2. Call helpline: 1930 (National Cyber Crime Helpline)
+3. Visit local Cyber Crime Cell
+
+Categories handled online:
+- Financial fraud / Online scams
+- Social media crimes
+- Child pornography / CSAM
+- Ransomware
+- Identity theft
+
+Documents to keep:
+- Screenshots of messages/transactions
+- Bank statements
+- Email headers
+- URLs and usernames
+
+## ENVIRONMENT AND PUBLIC INTEREST
+
+National Green Tribunal (NGT):
+- For environmental disputes
+- Fast track court for environmental cases
+- Citizens can file complaints for environmental violations
+
+Public Grievances:
+- CPGRAMS (Centralised Public Grievance Redress and Monitoring System): pgportal.gov.in
+- Prime Minister's Office: pmindia.gov.in
+- State-level portals available in each state

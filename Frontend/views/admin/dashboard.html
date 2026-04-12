@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <style>
+    .tabs{display:flex;gap:5px;flex-wrap:wrap;border-bottom:2px solid var(--ivory-dark);padding-bottom:12px;margin-bottom:22px}
+    .tab{padding:8px 18px;border-radius:50px;cursor:pointer;font-size:0.83rem;font-weight:600;color:var(--muted);transition:var(--transition);border:none;background:transparent}
+    .tab.active{background:var(--navy);color:#fff}
+    .tab:hover:not(.active){background:var(--ivory);color:var(--navy)}
+    .pane{display:none}.pane.active{display:block}
+    .lcrd{background:var(--white);border-radius:var(--radius-lg);padding:22px;border:1px solid var(--ivory-dark);margin-bottom:14px}
+    .lmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:var(--ivory);border-radius:var(--radius);padding:12px;margin:12px 0;font-size:0.8rem}
+    .ml{color:var(--muted);font-size:0.7rem;text-transform:uppercase;margin-bottom:2px}
+    .mv{font-weight:600;color:var(--navy)}
+    .pill{padding:3px 10px;border-radius:50px;font-size:0.72rem;font-weight:700;display:inline-block}
+    .pill-pending{background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+    .pill-ok{background:#f0fdf4;color:#16a34a;border:1px solid #86efac}
+    .pill-bad{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5}
+    /* Plan cards */
+    .plan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+    .plan-card{background:var(--white);border:1.5px solid var(--ivory-dark);border-radius:var(--radius-lg);padding:20px;text-align:center}
+    .plan-price{font-size:1.6rem;font-weight:900;color:var(--navy);margin:8px 0}
+    .plan-price span{font-size:0.8rem;font-weight:400;color:var(--muted)}
+    .plan-feat{font-size:0.78rem;color:var(--muted);text-align:left;margin-top:12px;line-height:1.9}
+    .plan-feat li{list-style:none;padding-left:16px;position:relative}
+    .plan-feat li::before{content:"✓";position:absolute;left:0;color:var(--success);font-weight:700}
+    /* Roadmap */
+    .roadmap{position:relative;padding-left:32px}
+    .roadmap::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--ivory-dark)}
+    .rm-item{position:relative;margin-bottom:28px}
+    .rm-dot{position:absolute;left:-27px;width:18px;height:18px;border-radius:50%;border:3px solid var(--white);top:3px}
+    .rm-badge{display:inline-block;padding:2px 10px;border-radius:50px;font-size:0.68rem;font-weight:700;margin-bottom:6px}
+    .badge-live{background:#dcfce7;color:#16a34a}
+    .badge-planned{background:#fffbeb;color:#92400e}
+    .badge-future{background:#eff6ff;color:#1d4ed8}
+    .badge-vision{background:#f5f3ff;color:#7c3aed}
+    /* Broadcast */
+    .preview-box{background:var(--ivory);border-radius:var(--radius);padding:16px;margin-top:12px;display:none}
+    @media(max-width:640px){.lmeta{grid-template-columns:1fr 1fr}.plan-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <span style="color:var(--gold);font-weight:700;font-size:0.8rem;letter-spacing:1px">🛡️ ADMIN</span>
+    <div class="navbar-actions" style="margin-left:auto;gap:10px">
+      <div class="notif-bell" id="notifBell"><span>🔔</span><span class="notif-count" id="notifCount">0</span></div>
+      <div id="adminBadge" style="width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy);cursor:pointer;font-size:0.9rem" onclick="Auth.logout()">A</div>
+      <a href="/login" onclick="Auth.logout();return false;" class="btn btn-secondary btn-sm">Logout</a>
+    </div>
+  </nav>
+
+  <div id="notifDropdown" style="display:none;position:fixed;top:70px;right:16px;width:300px;background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:150;max-height:380px;overflow:hidden;border:1px solid var(--ivory-dark)">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--ivory-dark);display:flex;justify-content:space-between;align-items:center">
+      <strong>🔔 Notifications</strong>
+      <button onclick="NotifPanel.markAllRead()" style="font-size:0.7rem;padding:2px 8px;border:1px solid var(--ivory-dark);border-radius:50px;background:none;cursor:pointer">Mark all read</button>
+    </div>
+    <div id="notifDropdownList" style="overflow-y:auto;max-height:300px;padding:6px"></div>
+  </div>
+
+  <div style="padding:calc(var(--navbar-h) + 24px) 24px 40px;max-width:1280px;margin:0 auto">
+    <div class="mb-24">
+      <h2>🛡️ LEXASSIST Admin Control Panel</h2>
+      <p>Manage users, verify lawyers, monitor platform analytics</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid mb-24">
+      <div class="stat-card"><div class="stat-icon navy">👥</div><div><div class="stat-value" id="sCitizens">—</div><div class="stat-label">Citizens</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold">⚖️</div><div><div class="stat-value" id="sLawyers">—</div><div class="stat-label">Verified Lawyers</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">📋</div><div><div class="stat-value" id="sCases">—</div><div class="stat-label">Total Cases</div></div></div>
+      <div class="stat-card"><div class="stat-icon red"><span style="font-size:1.2rem">⏳</span></div><div><div class="stat-value" id="sPending" style="color:var(--danger)">—</div><div class="stat-label">Pending Verifications</div></div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="sw('verification',this)">⚖️ Verification <span id="pendBadge" style="background:var(--danger);color:#fff;border-radius:50px;padding:1px 6px;font-size:0.65rem;margin-left:4px"></span></button>
+      <button class="tab" onclick="sw('alllawyers',this)">📋 All Lawyers</button>
+      <button class="tab" onclick="sw('users',this)">👥 Users</button>
+      <button class="tab" onclick="sw('plans',this)">💳 Subscription Plans</button>
+      <button class="tab" onclick="sw('broadcast',this)">📢 Broadcast</button>
+      <button class="tab" onclick="sw('analytics',this)">📊 Analytics</button>
+      <button class="tab" onclick="sw('roadmap',this)">🗺️ Roadmap</button>
+    </div>
+
+    <!-- TAB: VERIFICATION -->
+    <div class="pane active" id="pane-verification">
+      <div class="flex-between mb-16 flex-wrap gap-8">
+        <h3>⚖️ Pending Lawyer Verifications</h3>
+        <button onclick="loadPending()" class="btn btn-outline btn-sm">🔄 Refresh</button>
+      </div>
+      <div id="pendingList"><div class="text-center text-muted" style="padding:40px"><span class="loader dark"></span></div></div>
+    </div>
+
+    <!-- TAB: ALL LAWYERS -->
+    <div class="pane" id="pane-alllawyers">
+      <div class="flex-between mb-16 flex-wrap gap-8">
+        <h3>📋 All Lawyers</h3>
+        <select id="lwFilter" class="form-control" style="width:150px" onchange="loadAllLawyers()">
+          <option value="">All Status</option>
+          <option value="verified">✅ Verified</option>
+          <option value="pending">⏳ Pending</option>
+          <option value="rejected">❌ Rejected</option>
+        </select>
+      </div>
+      <div class="table-wrap" style="overflow-x:auto">
+        <table><thead><tr><th>Lawyer</th><th>Bar Council</th><th>Specialization</th><th>Exp.</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+        <tbody id="allLawyersTbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- TAB: USERS -->
+    <div class="pane" id="pane-users">
+      <div class="flex-between mb-16 flex-wrap gap-8">
+        <h3>👥 All Users</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="userSearch" class="form-control" placeholder="Search name/email..." style="width:190px" oninput="loadUsers()">
+          <select id="userRoleFilter" class="form-control" style="width:120px" onchange="loadUsers()">
+            <option value="">All Roles</option><option value="citizen">Citizens</option><option value="lawyer">Lawyers</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap" style="overflow-x:auto">
+        <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="usersTbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- TAB: SUBSCRIPTION PLANS -->
+    <div class="pane" id="pane-plans">
+      <h3 class="mb-16">💳 Subscription Plans Configuration</h3>
+      <div style="background:#fffbeb;border-left:4px solid #f59e0b;padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:0.84rem;color:#92400e">
+        ℹ️ Plans are shown here for admin reference only. Citizens and lawyers do NOT see pricing anywhere on their dashboards.
+      </div>
+      <h4 style="color:var(--navy);margin-bottom:14px">👨 Citizen Plans</h4>
+      <div class="plan-grid">
+        <div class="plan-card" style="border-color:var(--ivory-dark)">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase">Basic</div>
+          <div class="plan-price">Free</div>
+          <div style="font-size:0.75rem;color:var(--success);font-weight:600;margin-bottom:8px">Currently Active (All Users)</div>
+          <ul class="plan-feat"><li>3 AI queries/day</li><li>1 active case</li><li>View lawyers</li><li>Basic document templates</li></ul>
+        </div>
+        <div class="plan-card" style="border-color:var(--gold)">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--gold);text-transform:uppercase">Pro</div>
+          <div class="plan-price">₹49<span>/month</span></div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">Phase 2 — Planned</div>
+          <ul class="plan-feat"><li>Unlimited AI queries</li><li>5 active cases</li><li>Priority lawyer booking</li><li>Document generator</li><li>SMS hearing reminders</li></ul>
+        </div>
+        <div class="plan-card" style="border-color:var(--navy)">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase">Legal Shield</div>
+          <div class="plan-price">₹99<span>/month</span></div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">Phase 2 — Planned</div>
+          <ul class="plan-feat"><li>Everything in Pro</li><li>1 free consultation</li><li>5GB document storage</li><li>Case history export</li></ul>
+        </div>
+      </div>
+      <h4 style="color:var(--navy);margin:20px 0 14px">⚖️ Lawyer Plans</h4>
+      <div class="plan-grid">
+        <div class="plan-card">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase">Basic</div>
+          <div class="plan-price">Free</div>
+          <div style="font-size:0.75rem;color:var(--success);font-weight:600;margin-bottom:8px">Currently Active</div>
+          <ul class="plan-feat"><li>Profile listing</li><li>5 appointments/month</li><li>Case management</li></ul>
+        </div>
+        <div class="plan-card" style="border-color:var(--gold)">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--gold);text-transform:uppercase">Pro</div>
+          <div class="plan-price">₹199<span>/month</span></div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">Phase 2 — Planned</div>
+          <ul class="plan-feat"><li>Featured profile listing</li><li>Unlimited appointments</li><li>Analytics dashboard</li><li>Client CRM tools</li></ul>
+        </div>
+        <div class="plan-card" style="border-color:var(--navy)">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase">Elite</div>
+          <div class="plan-price">₹499<span>/month</span></div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">Phase 2 — Planned</div>
+          <ul class="plan-feat"><li>Top placement in search</li><li>AI-drafted documents</li><li>Priority lead alerts</li><li>Verified Elite badge</li></ul>
+        </div>
+      </div>
+      <div style="background:var(--ivory);border-radius:var(--radius-lg);padding:18px;margin-top:10px">
+        <div style="font-weight:600;color:var(--navy);margin-bottom:8px">📊 Projected Revenue at Scale</div>
+        <div style="font-size:0.84rem;color:var(--muted);line-height:2">
+          100 Pro lawyers × ₹199 = <strong style="color:var(--navy)">₹19,900/month</strong><br>
+          500 Pro lawyers × ₹199 = <strong style="color:var(--navy)">₹99,500/month</strong><br>
+          1,000 Pro lawyers × ₹199 = <strong style="color:var(--navy)">₹1,99,000/month (~₹2L MRR)</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: BROADCAST -->
+    <div class="pane" id="pane-broadcast">
+      <h3 class="mb-16">📢 Send Broadcast Email</h3>
+      <div class="lcrd">
+        <div class="form-group">
+          <label class="form-label">Send To</label>
+          <select id="broadTarget" class="form-control">
+            <option value="all">All Users</option>
+            <option value="citizen">Citizens Only</option>
+            <option value="lawyer">Lawyers Only</option>
+            <option value="specific">Specific Email</option>
+          </select>
+        </div>
+        <div class="form-group" id="specificEmailWrap" style="display:none">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="specificEmail" class="form-control" placeholder="user@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject *</label>
+          <input type="text" id="broadSubject" class="form-control" placeholder="Important update from LEXASSIST">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message Body *</label>
+          <textarea id="broadMsg" class="form-control" rows="5" placeholder="Write your message here..."></textarea>
+        </div>
+        <div id="broadAlert" class="alert"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button onclick="previewBroadcast()" class="btn btn-outline">👁️ Preview Email</button>
+          <button onclick="sendBroadcast()" id="broadBtn" class="btn btn-primary">📤 Send Now</button>
+        </div>
+        <div class="preview-box" id="previewBox">
+          <div style="font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:10px;text-transform:uppercase">Preview:</div>
+          <div style="border:1px solid var(--ivory-dark);border-radius:var(--radius);padding:16px;background:#fff">
+            <div style="font-weight:700;color:var(--navy);margin-bottom:6px" id="prevSubject"></div>
+            <div style="color:var(--muted);font-size:0.84rem;white-space:pre-wrap" id="prevBody"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ANALYTICS -->
+    <div class="pane" id="pane-analytics">
+      <h3 class="mb-16">📊 Platform Analytics</h3>
+      <div class="grid-2">
+        <div class="card"><h4 class="mb-16">Cases by Type</h4><div id="caseTypeChart"></div></div>
+        <div class="card"><h4 class="mb-16">Cases by Status</h4><div id="caseStatusChart"></div></div>
+        <div class="card"><h4 class="mb-16">Appointments by Status</h4><div id="apptChart"></div></div>
+        <div class="card"><h4 class="mb-16">Recent Registrations</h4><div id="recentReg"></div></div>
+      </div>
+    </div>
+
+    <!-- TAB: ROADMAP -->
+    <div class="pane" id="pane-roadmap">
+      <h3 class="mb-16">🗺️ Business Roadmap</h3>
+      <div class="roadmap">
+        <div class="rm-item">
+          <div class="rm-dot" style="background:var(--success)"></div>
+          <div class="rm-badge badge-live">● LIVE NOW</div>
+          <h4 style="color:var(--navy);margin:4px 0">Phase 1 — Foundation (2024)</h4>
+          <p style="color:var(--muted);font-size:0.84rem">Free platform for all citizens and lawyers. Core features: AI chatbot powered by TF-IDF RAG on Indian legal database, lawyer verification by admin, case management with timeline tracking, court appointment booking, document generation (FIR, Notice, Bail), email notifications via Gmail SMTP, individual calendars with hearing reminders.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+            <span class="badge badge-active">AI Chatbot</span><span class="badge badge-active">Case Tracking</span><span class="badge badge-active">Lawyer Verification</span><span class="badge badge-active">Email OTP</span><span class="badge badge-active">Document Generator</span>
+          </div>
+        </div>
+        <div class="rm-item">
+          <div class="rm-dot" style="background:#f59e0b"></div>
+          <div class="rm-badge badge-planned">◑ PLANNED — 6 months</div>
+          <h4 style="color:var(--navy);margin:4px 0">Phase 2 — Monetization (Mid 2025)</h4>
+          <p style="color:var(--muted);font-size:0.84rem">Activate subscription plans: Citizen Pro ₹49/month, Lawyer Pro ₹199/month. 10-15% platform commission on court appointments. Document credit packs. SMS hearing reminders. Razorpay payment integration. Advanced AI with GPT upgrade.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+            <span class="badge badge-pending">Subscriptions</span><span class="badge badge-pending">Commission Model</span><span class="badge badge-pending">Razorpay</span><span class="badge badge-pending">SMS Reminders</span>
+          </div>
+        </div>
+        <div class="rm-item">
+          <div class="rm-dot" style="background:#3b82f6"></div>
+          <div class="rm-badge badge-future">○ FUTURE — 18 months</div>
+          <h4 style="color:var(--navy);margin:4px 0">Phase 3 — Enterprise & AI (Late 2025)</h4>
+          <p style="color:var(--muted);font-size:0.84rem">B2B enterprise API for NGOs and law firms (₹25,000–₹1,00,000/year). Anonymised legal analytics sold to academic researchers. Vernacular AI in Hindi, Telugu, Tamil. Mobile apps for iOS and Android. Real-time WebSocket notifications.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+            <span class="badge badge-pending">Enterprise API</span><span class="badge badge-pending">Mobile Apps</span><span class="badge badge-pending">Hindi/Telugu AI</span><span class="badge badge-pending">Legal Analytics</span>
+          </div>
+        </div>
+        <div class="rm-item">
+          <div class="rm-dot" style="background:#7c3aed"></div>
+          <div class="rm-badge badge-vision">◎ VISION — 3 years</div>
+          <h4 style="color:var(--navy);margin:4px 0">Phase 4 — National Scale (2027)</h4>
+          <p style="color:var(--muted);font-size:0.84rem">Pan-India expansion across all 28 states. Government legal aid contracts with state legal services authorities. NALSA official integration. Target: 1 million+ users, ₹10 crore annual revenue. International expansion to South Asian markets.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+            <span class="badge badge-pending">NALSA Integration</span><span class="badge badge-pending">Pan-India</span><span class="badge badge-pending">1M+ Users</span><span class="badge badge-pending">Govt Contracts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div class="modal-overlay" id="rejectModal">
+    <div class="modal">
+      <div class="modal-header"><div class="modal-title">❌ Reject Lawyer</div><button class="modal-close" onclick="closeModal('rejectModal')">✕</button></div>
+      <input type="hidden" id="rejectId">
+      <div class="form-group"><label class="form-label">Reason *</label>
+        <select id="rejectSel" class="form-control" onchange="document.getElementById('rejectReason').value=this.value==='custom'?'':this.value;document.getElementById('customReasonWrap').style.display=this.value==='custom'?'block':'none'">
+          <option value="">Select reason</option>
+          <option value="Invalid Bar Council ID. Please provide correct registration number.">Invalid Bar Council ID</option>
+          <option value="Incomplete profile. Please fill all required fields.">Incomplete profile</option>
+          <option value="Documents appear incorrect or expired. Please upload valid documents.">Invalid documents</option>
+          <option value="Specialization doesn't match Bar Council records.">Specialization mismatch</option>
+          <option value="custom">Other (custom)</option>
+        </select>
+      </div>
+      <div id="customReasonWrap" style="display:none" class="form-group"><label class="form-label">Custom Reason</label><textarea id="rejectReason" class="form-control" rows="3"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button onclick="doReject()" class="btn btn-danger" id="doRejectBtn">Reject & Notify</button>
+        <button onclick="closeModal('rejectModal')" class="btn btn-outline">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    Auth.guard(['admin']);
+    const user = Auth.user();
+    document.getElementById('adminBadge').textContent = (user.name||'A')[0].toUpperCase();
+
+    // ── Tab switch ────────────────────────────────────────────
+    const sw = (tab, el) => {
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('pane-'+tab).classList.add('active');
+      if(tab==='verification') loadPending();
+      if(tab==='alllawyers')   loadAllLawyers();
+      if(tab==='users')        loadUsers();
+      if(tab==='analytics')    loadAnalytics();
+    };
+
+    // ── Bar chart ─────────────────────────────────────────────
+    const barChart = (id, data) => {
+      const el=document.getElementById(id);
+      if(!data?.length){el.innerHTML='<p class="text-muted">No data yet</p>';return;}
+      const max=Math.max(...data.map(d=>d.count));
+      el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+        <div style="width:110px;font-size:0.76rem;color:var(--muted);text-align:right;flex-shrink:0">${d._id||'Unknown'}</div>
+        <div style="flex:1;height:7px;background:var(--ivory-dark);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${Math.round((d.count/max)*100)}%;background:linear-gradient(90deg,var(--navy),var(--gold));border-radius:4px"></div>
+        </div>
+        <div style="font-size:0.78rem;font-weight:700;color:var(--navy);width:24px">${d.count}</div>
+      </div>`).join('');
+    };
+
+    // ── Stats ─────────────────────────────────────────────────
+    const loadStats = async () => {
+      try {
+        const d=await API.get('/api/admin/stats');
+        if(!d.success) return;
+        document.getElementById('sCitizens').textContent=d.data.totalCitizens;
+        document.getElementById('sLawyers').textContent=d.data.totalLawyers;
+        document.getElementById('sCases').textContent=d.data.totalCases;
+        document.getElementById('sPending').textContent=d.data.pendingVerifications;
+        const pb=document.getElementById('pendBadge');
+        if(d.data.pendingVerifications>0) pb.textContent=d.data.pendingVerifications;
+      } catch(e){}
+    };
+
+    // ── Pending Verifications ─────────────────────────────────
+    const loadPending = async () => {
+      const el=document.getElementById('pendingList');
+      el.innerHTML='<div class="text-center text-muted" style="padding:40px"><span class="loader dark"></span></div>';
+      try {
+        const d=await API.get('/api/admin/lawyers/pending');
+        if(!d.data?.length){el.innerHTML='<div class="card text-center" style="padding:48px"><div style="font-size:2.5rem;margin-bottom:14px">✅</div><h3>All verified!</h3><p>No pending verifications.</p></div>';return;}
+        el.innerHTML=d.data.map(l=>`
+          <div class="lcrd" id="lcard-${l._id}">
+            <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+              <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy-light));display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:var(--gold);flex-shrink:0">${(l.user?.name||'L')[0]}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                  <h3 style="margin:0;font-size:1rem;color:var(--navy)">${l.user?.name||'Unknown'}</h3>
+                  <span class="pill pill-pending">⏳ Pending</span>
+                </div>
+                <div style="color:var(--muted);font-size:0.82rem">${l.user?.email||''} · 📞 ${l.user?.phone||'—'}</div>
+                <div style="color:var(--muted);font-size:0.76rem">Registered: ${DateUtils.format(l.user?.createdAt)}</div>
+              </div>
+            </div>
+            <div class="lmeta">
+              <div><div class="ml">Bar Council ID</div><div class="mv">${l.barCouncilId||'—'}</div></div>
+              <div><div class="ml">Specializations</div><div class="mv">${(l.specializations||[]).join(', ')||'—'}</div></div>
+              <div><div class="ml">Experience</div><div class="mv">${l.experience||0} years</div></div>
+              <div><div class="ml">Location</div><div class="mv">${[l.location?.city,l.location?.state].filter(Boolean).join(', ')||'—'}</div></div>
+              <div><div class="ml">Languages</div><div class="mv">${(l.languages||[]).join(', ')||'—'}</div></div>
+              <div><div class="ml">Education</div><div class="mv">${(l.education||[]).map(e=>e.degree).join(', ')||'—'}</div></div>
+            </div>
+            ${l.bio?`<div style="background:var(--ivory);border-radius:var(--radius);padding:11px 14px;font-size:0.84rem;color:var(--muted);margin-bottom:10px"><strong style="color:var(--navy)">Bio: </strong>${l.bio}</div>`:''}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+              <button class="btn btn-primary btn-sm" onclick="doVerify('${l._id}',this)">✅ Verify & Notify</button>
+              <button class="btn btn-danger btn-sm" onclick="openReject('${l._id}')">❌ Reject</button>
+            </div>
+          </div>`).join('');
+      } catch(e){el.innerHTML='<div class="alert alert-danger show">Error loading</div>';}
+    };
+
+    const doVerify = async(id,btn) => {
+      if(!confirm('Verify this lawyer? They will be notified by email.'))return;
+      btn.innerHTML='<span class="loader"></span>'; btn.disabled=true;
+      const d=await API.put(`/api/admin/lawyers/${id}/verify`,{});
+      if(d.success){Toast.show('✅ Verified & notified!','success');document.getElementById(`lcard-${id}`)?.remove();loadStats();}
+      else{Toast.show(d.message,'danger');btn.innerHTML='✅ Verify & Notify';btn.disabled=false;}
+    };
+
+    const openReject=(id)=>{document.getElementById('rejectId').value=id;document.getElementById('rejectSel').value='';document.getElementById('rejectReason').value='';document.getElementById('customReasonWrap').style.display='none';openModal('rejectModal');};
+    const doReject=async()=>{
+      const id=document.getElementById('rejectId').value;
+      const reason=document.getElementById('rejectSel').value==='custom'?document.getElementById('rejectReason').value:document.getElementById('rejectSel').value;
+      if(!reason){Toast.show('Select a reason','warning');return;}
+      const btn=document.getElementById('doRejectBtn');btn.innerHTML='<span class="loader"></span>';btn.disabled=true;
+      const d=await API.put(`/api/admin/lawyers/${id}/reject`,{reason});
+      if(d.success){Toast.show('Rejected & notified','success');closeModal('rejectModal');document.getElementById(`lcard-${id}`)?.remove();loadStats();}
+      else Toast.show(d.message,'danger');
+      btn.innerHTML='Reject & Notify';btn.disabled=false;
+    };
+
+    // ── All Lawyers ───────────────────────────────────────────
+    const loadAllLawyers=async()=>{
+      const status=document.getElementById('lwFilter').value;
+      const tbody=document.getElementById('allLawyersTbody');
+      tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px"><span class="loader dark"></span></td></tr>';
+      try{
+        const d=await API.get(`/api/admin/lawyers?${status?'status='+status:''}`);
+        tbody.innerHTML=(d.data||[]).map(l=>{
+          const st=l.isRejected?'rejected':l.isVerified?'verified':'pending';
+          const pill={verified:'pill-ok',pending:'pill-pending',rejected:'pill-bad'}[st];
+          const label={verified:'✅ Verified',pending:'⏳ Pending',rejected:'❌ Rejected'}[st];
+          return `<tr>
+            <td><div style="font-weight:600;color:var(--navy)">${l.user?.name||'—'}</div><div style="font-size:0.74rem;color:var(--muted)">${l.user?.email||''}</div></td>
+            <td style="font-family:monospace;font-size:0.8rem">${l.barCouncilId||'—'}</td>
+            <td style="font-size:0.82rem">${(l.specializations||[]).join(', ')||'—'}</td>
+            <td>${l.experience||0}y</td>
+            <td><span class="pill ${pill}">${label}</span></td>
+            <td style="font-size:0.76rem">${DateUtils.format(l.createdAt)}</td>
+            <td><div style="display:flex;gap:5px">
+              ${!l.isVerified&&!l.isRejected?`<button class="btn btn-primary btn-sm" onclick="doVerify('${l._id}',this)">Verify</button>`:''}
+              ${!l.isRejected?`<button class="btn btn-danger btn-sm" onclick="openReject('${l._id}')">Reject</button>`:''}
+              ${l.isRejected?`<button class="btn btn-outline btn-sm" onclick="doVerify('${l._id}',this)">Re-verify</button>`:''}
+            </div></td>
+          </tr>`;
+        }).join('')||'<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">No lawyers found</td></tr>';
+      }catch(e){}
+    };
+
+    // ── Users ─────────────────────────────────────────────────
+    const loadUsers=async()=>{
+      const role=document.getElementById('userRoleFilter').value;
+      const search=document.getElementById('userSearch').value;
+      const tbody=document.getElementById('usersTbody');
+      tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px"><span class="loader dark"></span></td></tr>';
+      try{
+        const p=new URLSearchParams();if(role)p.append('role',role);if(search)p.append('search',search);
+        const d=await API.get(`/api/admin/users?${p}`);
+        tbody.innerHTML=(d.data||[]).map(u=>`<tr>
+          <td style="font-weight:600;color:var(--navy)">${u.name}</td>
+          <td style="font-size:0.82rem">${u.email}</td>
+          <td><span class="pill ${u.role==='admin'?'pill-ok':u.role==='lawyer'?'pill-pending':'pill-pending'}">${u.role}</span></td>
+          <td style="font-size:0.76rem">${DateUtils.format(u.createdAt)}</td>
+          <td><span class="pill ${u.isActive?'pill-ok':'pill-bad'}">${u.isActive?'Active':'Inactive'}</span></td>
+          <td><button class="btn btn-sm btn-outline" onclick="toggleUser('${u._id}',this)">${u.isActive?'Deactivate':'Activate'}</button></td>
+        </tr>`).join('')||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">No users</td></tr>';
+      }catch(e){}
+    };
+
+    const toggleUser=async(id,btn)=>{
+      btn.innerHTML='...';btn.disabled=true;
+      const d=await API.put(`/api/admin/users/${id}/toggle`,{});
+      if(d.success){Toast.show(d.message,'success');loadUsers();}
+      else{Toast.show(d.message,'danger');btn.innerHTML=btn.textContent;btn.disabled=false;}
+    };
+
+    // ── Analytics ─────────────────────────────────────────────
+    const loadAnalytics=async()=>{
+      try{
+        const [an,st]=await Promise.all([API.get('/api/admin/analytics'),API.get('/api/admin/stats')]);
+        if(an.success){barChart('caseTypeChart',an.data.casesByType);barChart('caseStatusChart',an.data.casesByStatus);barChart('apptChart',an.data.apptByStatus);}
+        if(st.success&&st.data.recentUsers){
+          document.getElementById('recentReg').innerHTML=st.data.recentUsers.map(u=>`
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--ivory-dark);font-size:0.84rem">
+              <div><div style="font-weight:600;color:var(--navy)">${u.name}</div><div style="color:var(--muted);font-size:0.74rem">${u.email}</div></div>
+              <span class="pill pill-pending">${u.role}</span>
+            </div>`).join('')||'<p class="text-muted">No registrations yet</p>';
+        }
+      }catch(e){}
+    };
+
+    // ── Broadcast ─────────────────────────────────────────────
+    document.getElementById('broadTarget').addEventListener('change',function(){
+      document.getElementById('specificEmailWrap').style.display=this.value==='specific'?'block':'none';
+    });
+
+    const previewBroadcast=()=>{
+      const subj=document.getElementById('broadSubject').value.trim();
+      const msg=document.getElementById('broadMsg').value.trim();
+      if(!subj||!msg){Toast.show('Add subject and message first','warning');return;}
+      document.getElementById('prevSubject').textContent=subj;
+      document.getElementById('prevBody').textContent=msg;
+      document.getElementById('previewBox').style.display='block';
+    };
+
+    const sendBroadcast=async()=>{
+      const target=document.getElementById('broadTarget').value;
+      const subj=document.getElementById('broadSubject').value.trim();
+      const msg=document.getElementById('broadMsg').value.trim();
+      const specific=document.getElementById('specificEmail').value.trim();
+      if(!subj||!msg){Toast.show('Subject and message are required','warning');return;}
+      if(target==='specific'&&!specific){Toast.show('Enter a specific email','warning');return;}
+      const btn=document.getElementById('broadBtn');
+      btn.innerHTML='<span class="loader"></span> Sending...';btn.disabled=true;
+      const body={title:subj,message:msg,role:target==='all'?undefined:target==='specific'?undefined:target,specificEmail:target==='specific'?specific:undefined};
+      const d=await API.post('/api/admin/broadcast',body);
+      if(d.success){
+        const al=document.getElementById('broadAlert');
+        al.className='alert alert-success show';al.textContent=d.message;
+        document.getElementById('broadSubject').value='';document.getElementById('broadMsg').value='';
+        document.getElementById('previewBox').style.display='none';
+      }else Toast.show(d.message,'danger');
+      btn.innerHTML='📤 Send Now';btn.disabled=false;
+    };
+
+    // ── Notifications ─────────────────────────────────────────
+    document.getElementById('notifBell').onclick=()=>NotifPanel.toggle();
+
+    // ── Init ──────────────────────────────────────────────────
+    loadStats();
+    loadPending();
+    NotifPanel.init();
+    setInterval(loadStats,60000);
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

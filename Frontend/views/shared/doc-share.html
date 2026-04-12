@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Document – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body style="background:var(--ivory);min-height:100vh;display:flex;flex-direction:column">
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">LEX<span>ASSIST</span></a>
+    <span class="navbar-tag">📄 Shared Document</span>
+    <div class="navbar-actions" style="margin-left:auto">
+      <a href="/register" class="btn btn-primary btn-sm">Join LEXASSIST</a>
+    </div>
+  </nav>
+
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:calc(var(--navbar-h) + 24px) 16px 24px">
+    <div style="max-width:520px;width:100%">
+      <!-- Loading -->
+      <div id="loadingState" class="card text-center" style="padding:48px">
+        <span class="loader dark" style="width:32px;height:32px;border-width:3px"></span>
+        <p style="margin-top:16px">Loading shared document...</p>
+      </div>
+
+      <!-- Success -->
+      <div id="successState" class="hidden card" style="padding:36px">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:3rem;margin-bottom:10px" id="docIcon">📄</div>
+          <h2 id="docTitle" style="color:var(--navy);word-break:break-word"></h2>
+          <p id="docSubtitle" style="font-size:0.855rem;margin-top:4px"></p>
+        </div>
+
+        <div style="background:var(--ivory);border-radius:var(--radius);padding:16px;margin-bottom:20px">
+          <table style="width:100%;border-collapse:collapse">
+            <tr><td style="padding:6px 0;font-weight:600;color:var(--navy);font-size:0.84rem;width:40%">Shared by</td><td id="sharedBy" style="padding:6px 0;color:var(--muted);font-size:0.84rem"></td></tr>
+            <tr><td style="padding:6px 0;font-weight:600;color:var(--navy);font-size:0.84rem">Uploaded on</td><td id="uploadedAt" style="padding:6px 0;color:var(--muted);font-size:0.84rem"></td></tr>
+            <tr><td style="padding:6px 0;font-weight:600;color:var(--navy);font-size:0.84rem">Link expires</td><td id="expiresAt" style="padding:6px 0;color:var(--danger);font-size:0.84rem;font-weight:600"></td></tr>
+            <tr id="caseRow" class="hidden"><td style="padding:6px 0;font-weight:600;color:var(--navy);font-size:0.84rem">Linked Case</td><td id="caseInfo" style="padding:6px 0;color:var(--muted);font-size:0.84rem"></td></tr>
+          </table>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-direction:column">
+          <a id="downloadBtn" href="#" download class="btn btn-primary btn-full btn-lg">⬇️ Download Document</a>
+          <a id="viewBtn" href="#" target="_blank" class="btn btn-outline btn-full">👁️ View in Browser</a>
+        </div>
+
+        <div style="margin-top:20px;padding:14px;background:rgba(13,27,53,0.04);border-radius:var(--radius);text-align:center">
+          <p style="font-size:0.8rem;margin-bottom:8px">Need legal help? Join LEXASSIST for free</p>
+          <a href="/register" class="btn btn-dark btn-sm">Create Free Account →</a>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div id="errorState" class="hidden card text-center" style="padding:48px">
+        <div style="font-size:3rem;margin-bottom:14px">❌</div>
+        <h3 id="errorTitle" style="color:var(--navy)">Link Expired or Invalid</h3>
+        <p id="errorMsg" style="margin:8px 0 20px">This share link has expired or is invalid. Please ask for a new link.</p>
+        <a href="/" class="btn btn-primary">Go to LEXASSIST</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = window.location.pathname.split('/').pop();
+
+    const getFileIcon = (type, name) => {
+      const t = (type||'').toLowerCase();
+      const n = (name||'').toLowerCase();
+      if (t.includes('pdf')||n.endsWith('.pdf'))   return '📕';
+      if (t.includes('word')||n.match(/\.docx?$/)) return '📘';
+      if (t.includes('image')||n.match(/\.(jpg|jpeg|png)$/)) return '🖼️';
+      return '📄';
+    };
+
+    const loadSharedDoc = async () => {
+      try {
+        const res  = await fetch(`/api/documents/shared/${token}`);
+        const data = await res.json();
+
+        document.getElementById('loadingState').classList.add('hidden');
+
+        if (!data.success) {
+          document.getElementById('errorState').classList.remove('hidden');
+          document.getElementById('errorTitle').textContent = data.message==='Share link has expired' ? '⏰ Link Expired' : '❌ Invalid Link';
+          document.getElementById('errorMsg').textContent   = data.message;
+          return;
+        }
+
+        const d = data.data;
+        document.getElementById('successState').classList.remove('hidden');
+        document.getElementById('docIcon').textContent   = getFileIcon(d.fileType, d.originalName);
+        document.getElementById('docTitle').textContent  = d.title || d.originalName;
+        document.getElementById('sharedBy').textContent  = d.uploadedBy || 'LEXASSIST User';
+        document.getElementById('uploadedAt').textContent= new Date(d.uploadedAt).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+        document.getElementById('expiresAt').textContent = new Date(d.expiresAt).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+
+        if (d.case) {
+          document.getElementById('caseRow').classList.remove('hidden');
+          document.getElementById('caseInfo').textContent = `${d.case.caseNumber} – ${d.case.title}`;
+        }
+
+        document.getElementById('downloadBtn').href = d.fileUrl;
+        document.getElementById('downloadBtn').download = d.originalName || d.title;
+        document.getElementById('viewBtn').href = d.fileUrl;
+
+        // Update page title
+        document.title = `${d.title||d.originalName} – LEXASSIST`;
+
+      } catch(e) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+        document.getElementById('errorMsg').textContent = 'Network error. Please check your connection and try again.';
+      }
+    };
+
+    loadSharedDoc();
+  </script>
+  <script src="/js/global-enhancements.js"></script>
+</body>
+</html>

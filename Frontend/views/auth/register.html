@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register – LEXASSIST</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    .otp-box { display:flex; gap:14px; justify-content:center; margin:22px 0; }
+    .otp-box input {
+      width:56px; height:64px; text-align:center; font-size:1.8rem; font-weight:900;
+      border:2.5px solid var(--ivory-dark); border-radius:12px; outline:none;
+      color:var(--navy); transition:all 0.2s; font-family:'DM Sans',sans-serif;
+    }
+    .otp-box input:focus { border-color:var(--gold); box-shadow:0 0 0 4px rgba(201,168,76,0.15); }
+    .otp-box input.filled { border-color:var(--navy); background:rgba(13,27,53,0.04); }
+    .pw-bar { height:4px; border-radius:2px; background:var(--ivory-dark); overflow:hidden; margin-top:7px; }
+    .pw-bar-fill { height:100%; border-radius:2px; transition:all 0.3s; width:0; }
+    .pw-hint { font-size:0.72rem; margin-top:5px; color:var(--muted); }
+    .eye-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1rem; padding:4px; }
+    .rel { position:relative; }
+  </style>
+</head>
+<body class="auth-body">
+
+  <!-- STEP 1: Registration Form -->
+  <div class="auth-box" id="step1">
+    <div class="auth-logo">LEX<span>ASSIST</span></div>
+    <h2 class="auth-title" style="margin-top:14px">Create Account</h2>
+    <p class="auth-subtitle">Join and get AI-powered legal help</p>
+
+    <div class="role-tabs">
+      <div class="role-tab active" onclick="setRole('citizen',this)">👨 Citizen</div>
+      <div class="role-tab" onclick="setRole('lawyer',this)">⚖️ Lawyer</div>
+    </div>
+
+    <div id="alert1" class="alert"></div>
+
+    <form id="form1" novalidate>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" id="f_name" class="form-control" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Number *</label>
+          <input type="tel" id="f_phone" class="form-control" placeholder="10-digit number"
+            maxlength="10" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" id="f_email" class="form-control" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password *</label>
+        <div class="rel">
+          <input type="password" id="f_pass" class="form-control" placeholder="Min 8 chars with Aa1!"
+            oninput="pwStrength(this.value)" style="padding-right:44px" required>
+          <button type="button" class="eye-btn" onclick="toggleEye('f_pass',this)">👁️</button>
+        </div>
+        <div class="pw-bar" id="pwBar" style="display:none"><div class="pw-bar-fill" id="pwFill"></div></div>
+        <div class="pw-hint" id="pwHint"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirm Password *</label>
+        <div class="rel">
+          <input type="password" id="f_pass2" class="form-control" placeholder="Re-enter password"
+            style="padding-right:44px" required>
+          <button type="button" class="eye-btn" onclick="toggleEye('f_pass2',this)">👁️</button>
+        </div>
+      </div>
+
+      <div id="lawyerFields" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Bar Council ID *</label>
+          <input type="text" id="f_bar" class="form-control" placeholder="e.g. BAR/TS/2015/001">
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Specialization</label>
+            <select id="f_spec" class="form-control">
+              <option value="">Select</option>
+              <option>Criminal</option><option>Civil</option><option>Family</option>
+              <option>Corporate</option><option>Property</option><option>Labour</option>
+              <option>Cyber</option><option>Taxation</option><option>Constitutional</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Experience (years)</label>
+            <input type="number" id="f_exp" class="form-control" placeholder="0" min="0" max="60">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="btn1" class="btn btn-primary btn-full btn-lg">
+        Send Verification Code →
+      </button>
+    </form>
+
+    <div class="auth-footer">Already have an account? <a href="/login">Login here</a></div>
+  </div>
+
+  <!-- STEP 2: OTP Verification -->
+  <div class="auth-box" id="step2" style="display:none">
+    <div class="auth-logo">LEX<span>ASSIST</span></div>
+    <div style="text-align:center;margin:20px 0">
+      <div style="font-size:3rem;margin-bottom:12px">📧</div>
+      <h2 class="auth-title">Check Your Email</h2>
+      <p class="auth-subtitle">We sent a 4-digit code to</p>
+      <div id="sentEmail" style="font-weight:700;color:var(--navy);font-size:0.9rem;margin-top:4px"></div>
+    </div>
+
+    <div id="alert2" class="alert"></div>
+
+    <div class="otp-box">
+      <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+        oninput="mv(this,0)" onkeydown="bk(event,0)" id="o0">
+      <input type="text" maxlength="1" inputmode="numeric"
+        oninput="mv(this,1)" onkeydown="bk(event,1)" id="o1">
+      <input type="text" maxlength="1" inputmode="numeric"
+        oninput="mv(this,2)" onkeydown="bk(event,2)" id="o2">
+      <input type="text" maxlength="1" inputmode="numeric"
+        oninput="mv(this,3)" onkeydown="bk(event,3)" id="o3">
+    </div>
+
+    <div style="text-align:center;margin-bottom:18px">
+      <span id="timer" style="font-size:0.84rem;color:var(--danger);font-weight:600">10:00</span>
+      <span style="font-size:0.84rem;color:var(--muted)"> remaining</span>
+    </div>
+
+    <button onclick="doVerify()" id="btn2" class="btn btn-primary btn-full btn-lg">
+      Verify & Create Account →
+    </button>
+
+    <div style="text-align:center;margin-top:14px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button onclick="doResend()" id="resendBtn" class="btn btn-outline btn-sm" disabled>
+        Resend Code
+      </button>
+      <button onclick="goBack()" style="background:none;border:none;color:var(--muted);font-size:0.82rem;cursor:pointer">
+        ← Change email
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let role = 'citizen';
+    let regEmail = '';
+    let timerID  = null;
+
+    // ── Role toggle ───────────────────────────────────────────
+    function setRole(r, el) {
+      role = r;
+      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('lawyerFields').style.display = r === 'lawyer' ? 'block' : 'none';
+    }
+
+    // ── Password strength ─────────────────────────────────────
+    function pwStrength(val) {
+      const bar  = document.getElementById('pwBar');
+      const fill = document.getElementById('pwFill');
+      const hint = document.getElementById('pwHint');
+      if (!val) { bar.style.display='none'; return; }
+      bar.style.display = 'block';
+      const ok = [
+        val.length >= 8,
+        /[A-Z]/.test(val),
+        /[a-z]/.test(val),
+        /[0-9]/.test(val),
+        /[!@#$%^&*()_+\-=\[\]{}|,.<>?]/.test(val),
+      ];
+      const pct = (ok.filter(Boolean).length / 5) * 100;
+      fill.style.width      = pct + '%';
+      fill.style.background = pct <= 40 ? '#ef4444' : pct <= 70 ? '#f59e0b' : '#16a34a';
+      const labels = ['8+ chars','Uppercase','Lowercase','Number','Special (!@#)'];
+      hint.innerHTML = ok.map((v,i) =>
+        `<span style="color:${v?'#16a34a':'#94a3b8'};margin-right:8px">${v?'✓':'✗'} ${labels[i]}</span>`
+      ).join('');
+    }
+
+    function toggleEye(id, btn) {
+      const el = document.getElementById(id);
+      el.type  = el.type === 'password' ? 'text' : 'password';
+      btn.textContent = el.type === 'password' ? '👁️' : '🙈';
+    }
+
+    function showAlert(msg, type='danger', id='alert1') {
+      const el = document.getElementById(id);
+      el.className = `alert alert-${type} show`;
+      el.innerHTML = msg;
+      el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+
+    // ── Step 1 Submit ─────────────────────────────────────────
+    document.getElementById('form1').addEventListener('submit', async e => {
+      e.preventDefault();
+      const name  = document.getElementById('f_name').value.trim();
+      const phone = document.getElementById('f_phone').value.trim();
+      const email = document.getElementById('f_email').value.trim();
+      const pass  = document.getElementById('f_pass').value;
+      const pass2 = document.getElementById('f_pass2').value;
+
+      if (!name)  return showAlert('Please enter your full name');
+      if (!phone || phone.length !== 10 || !/^[6-9]/.test(phone))
+        return showAlert('Enter a valid 10-digit Indian mobile number (starts with 6-9)');
+      if (!email) return showAlert('Please enter your email address');
+      if (pass !== pass2) return showAlert('Passwords do not match');
+
+      const btn = document.getElementById('btn1');
+      btn.innerHTML = '<span class="loader"></span> Sending code...';
+      btn.disabled  = true;
+
+      try {
+        const body = { name, email, password:pass, role, phone };
+        const r    = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body:    JSON.stringify(body)
+        });
+        const d = await r.json();
+
+        if (!d.success) {
+          showAlert(d.errors ? d.errors.join('<br>• ') : d.message);
+          btn.innerHTML = 'Send Verification Code →';
+          btn.disabled  = false;
+          return;
+        }
+
+        // Show OTP step
+        regEmail = d.data.email || email;
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+        document.getElementById('sentEmail').textContent = regEmail;
+        startTimer();
+        document.getElementById('o0').focus();
+
+        // OTP sent to email - check inbox
+      } catch (err) {
+        showAlert('Connection error. Please check your internet and try again.');
+        btn.innerHTML = 'Send Verification Code →';
+        btn.disabled  = false;
+      }
+    });
+
+    // ── OTP helpers ───────────────────────────────────────────
+    function mv(el, idx) {
+      el.value = el.value.replace(/\D/g, '');
+      el.classList.toggle('filled', el.value !== '');
+      if (el.value && idx < 3) document.getElementById('o' + (idx+1)).focus();
+      if (idx === 3 && el.value) doVerify(); // Auto-submit on last digit
+    }
+
+    function bk(e, idx) {
+      if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+        document.getElementById('o' + (idx-1)).focus();
+      }
+    }
+
+    function getOTP() {
+      return [0,1,2,3].map(i => document.getElementById('o'+i).value).join('');
+    }
+
+    // ── Verify OTP ────────────────────────────────────────────
+    async function doVerify() {
+      const otp = getOTP();
+      if (otp.length !== 4) {
+        showAlert('Please enter all 4 digits', 'warning', 'alert2');
+        return;
+      }
+      const btn = document.getElementById('btn2');
+      btn.innerHTML = '<span class="loader"></span> Verifying...';
+      btn.disabled  = true;
+
+      try {
+        const r = await fetch('/api/auth/verify-otp', {
+          method:  'POST',
+          headers: { 'Content-Type':'application/json' },
+          body:    JSON.stringify({ email: regEmail, otp })
+        });
+        const d = await r.json();
+
+        if (!d.success) {
+          showAlert(d.message, 'danger', 'alert2');
+          btn.innerHTML = 'Verify & Create Account →';
+          btn.disabled  = false;
+          return;
+        }
+
+        // SUCCESS
+        localStorage.setItem('token', d.token);
+        localStorage.setItem('user',  JSON.stringify(d.data));
+        if (timerID) clearInterval(timerID);
+        showAlert('✅ Account verified! Redirecting...', 'success', 'alert2');
+
+        setTimeout(() => {
+          window.location.href = d.data.role === 'lawyer'
+            ? '/dashboard/lawyer'
+            : '/dashboard/citizen';
+        }, 1000);
+
+      } catch (err) {
+        showAlert('Server error. Please try again.', 'danger', 'alert2');
+        btn.innerHTML = 'Verify & Create Account →';
+        btn.disabled  = false;
+      }
+    }
+
+    // ── Resend OTP ────────────────────────────────────────────
+    async function doResend() {
+      const btn = document.getElementById('resendBtn');
+      btn.innerHTML = '...'; btn.disabled = true;
+      try {
+        const r = await fetch('/api/auth/resend-otp', {
+          method:  'POST',
+          headers: { 'Content-Type':'application/json' },
+          body:    JSON.stringify({ email: regEmail })
+        });
+        const d = await r.json();
+        if (d.success) {
+          showAlert('✅ New code sent! Check your inbox.', 'success', 'alert2');
+          [0,1,2,3].forEach(i => { const el = document.getElementById('o'+i); el.value=''; el.classList.remove('filled'); });
+          document.getElementById('o0').focus();
+          startTimer();
+        } else {
+          showAlert(d.message, 'danger', 'alert2');
+        }
+      } catch(e) {
+        showAlert('Error resending code.', 'danger', 'alert2');
+      }
+      btn.innerHTML = 'Resend Code'; btn.disabled = false;
+    }
+
+    function goBack() {
+      if (timerID) clearInterval(timerID);
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step1').style.display = 'block';
+    }
+
+    // ── OTP Timer ─────────────────────────────────────────────
+    function startTimer() {
+      if (timerID) clearInterval(timerID);
+      let secs = 600;
+      const resend = document.getElementById('resendBtn');
+      resend.disabled = true;
+
+      timerID = setInterval(() => {
+        secs--;
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        document.getElementById('timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
+
+        if (secs <= 0) {
+          clearInterval(timerID);
+          document.getElementById('timer').textContent = 'Expired';
+          resend.disabled = false;
+        }
+        if (secs === 540) resend.disabled = false; // Allow resend after 1 min
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

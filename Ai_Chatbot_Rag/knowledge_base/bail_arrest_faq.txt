@@ -1,0 +1,59 @@
+LEXASSIST — BAIL, ARREST AND CRIMINAL PROCEDURE FAQ
+============================================================
+
+Q: What is the difference between bailable and non-bailable offence?
+A: Bailable offence: Less serious crimes where bail is a RIGHT. Police must give bail. Examples: simple hurt (IPC 323), cheating (IPC 417), assault. Non-bailable offence: Serious crimes where only COURT can grant bail. Police cannot refuse but must produce you before magistrate. Examples: murder (IPC 302), rape (IPC 376), robbery (IPC 392), dacoity (IPC 395).
+
+---
+
+Q: How long can police keep me in custody?
+A: Police can keep you for a maximum of 24 hours without producing you before a Magistrate (Section 57 CrPC). After 24 hours, either you must be released or produced before Magistrate. Magistrate can extend custody up to 15 days (called judicial custody or remand). During this time you have the RIGHT to: meet a lawyer, inform family, get medical examination.
+
+---
+
+Q: What are my rights when police arrest me?
+A: Your rights when arrested (D.K. Basu Guidelines):
+1. Police must TELL you why you are being arrested
+2. You have RIGHT to call a lawyer immediately
+3. You have RIGHT to inform a family member
+4. Police must prepare a memo of arrest
+5. You must be produced before Magistrate within 24 hours
+6. You have RIGHT to medical examination
+7. You CANNOT be forced to confess
+8. You can remain silent — anything you say can be used against you
+
+---
+
+Q: What is bail? How to get bail?
+A: Bail is temporary release from jail while your case is going on. Types:
+1. Regular Bail (Section 437/439 CrPC): Applied after arrest
+2. Anticipatory Bail (Section 438 CrPC): Applied BEFORE arrest if you fear arrest
+3. Interim Bail: Temporary bail for a few days
+
+How to get bail:
+1. Your lawyer files bail application in court
+2. Need a surety (guarantor) who vouches for you
+3. Court considers: seriousness of offence, your past record, flight risk, evidence tampering risk
+4. If court grants bail, pay the bail amount (or surety bond)
+
+Free bail help: NALSA helpline 15100
+
+---
+
+Q: What is FIR? How to file FIR?
+A: FIR (First Information Report) is the first written complaint to police about a crime. Steps to file FIR:
+1. Go to nearest police station — any station (Zero FIR)
+2. Meet Station House Officer (SHO)
+3. Give your complaint — police will write it
+4. Read carefully before signing
+5. Get FREE copy of FIR — it is your legal right
+
+If police refuse to file FIR:
+- Send complaint by registered post to Superintendent of Police
+- Approach Magistrate under Section 156(3) CrPC
+- Call 100 or 112
+
+Zero FIR: Can be filed at ANY police station in India, regardless of where crime happened. Must be transferred to correct station within 24 hours.
+
+---
+
